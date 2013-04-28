@@ -4,31 +4,39 @@ require "player"
 require "scene"
 require "future"
 
+
 Game = inheritsFrom( Scene )
+
 
 function Game:init()
 	Game.scene = {}
 	Game.scene["future"] = Future:create()
 	Game.currentScene = "future"
-	Game.player = Player:create()
-	Game.scene[Game.currentScene].createPlayer(Game.player)
-	Game.camera = Rect:create( 0, 0, love.graphics.getWidth(), love.graphics.getHeight() )
+	Game.player = Game.scene[Game.currentScene].createPlayer()
+	Game.camera = Rect:create( 0, 0, window.w, window.h )
 end
 
 
 function Game.update(dt)
 	Game.player:update(dt)
 	Game.camera:centerOver(Game.player)
-	Game.camera.x = Game.camera.x + (Game.camera.w / 3)
-	Game.camera.y = Game.camera.y + (Game.camera.h / 3)
-	Game.scene[Game.currentScene]:update(dt)
+	Game.camera.x = Game.camera.x + (Game.camera.w / 5)
+	Game.camera.y = Game.camera.y - (Game.camera.h / 5)
+	Game.camera:keepWithin(Game.scene[Game.currentScene].map:getBounds())
+	--Game.camera:centerOver(Game.scene[Game.currentScene]:getPlayer())
+	
+	Game.scene[Game.currentScene]:update(dt, Game.player)
+	
+	--Game.scene[Game.currentScene]:update(Game.player)
+	
+	--print(Game.player.x..","..Game.player.y.."  "..Game.player.w.."x"..Game.player.h)
+	--print(Game.camera.x..","..Game.camera.y.."  "..Game.camera.w.."x"..Game.camera.h)
 end
 
 
-function Game:draw(camera)
+function Game:draw()
 	Game.scene[Game.currentScene]:draw(Game.camera)
-	love.graphics.draw(Game.player.sprite, Game.player.x, Game.player.y, 0, 1)
-	Game.player:draw()
+	Game.player:draw(Game.camera)
 	--drawHud()
 end
 
@@ -48,6 +56,7 @@ end
 
 
 function Game:onKeyUp(key)
+	Game.player:onKeyUp(key, isRepeat)
 end
 
 

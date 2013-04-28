@@ -55,21 +55,61 @@ function FutureMap:update(dt)
 end
 
 
-
-function FutureMap:draw(camera)
-	love.graphics.setColor(255,255,255,255)
-	for row = 1, self.rows do
-		for col = 1, self.columns do
-			if self[row][col] then
-				local r = Rect:create( col*self.tileSize - self.tileSize, row*self.tileSize - self.tileSize, self.tileSize, self.tileSize )
-				if camera:collidesWith( r ) then
-					--print("R:"..row.." C:"..col.." Value:"..self[row][col])
-					love.graphics.draw(self.images[ self[row][col] ], r.x, r.y, 0, 1, 1)
-				end
+function FutureMap:collidesWithTile(rect)
+	local col1 = math.ceil(rect.x / self.tileSize)
+	local col2 = math.ceil(rect.x + rect.w / self.tileSize)
+	local row1 = math.ceil(rect.y / self.tileSize)
+	local row2 = math.ceil(rect.y + rect.h / self.tileSize)
+	for c=col1,col2 do
+		for r=row1,row2 do
+			if self:getBlockType(c, r) ~= 0 then
+		--		return true
 			end
 		end
 	end
 end
 
 
+function FutureMap:getBlockType(col, row)
+	if self[col] then
+		block = self[col][row]
+	end
+	if block then
+		return block else
+	return 0
+	end
+end
+
+
+function FutureMap:getTileFromPixel(x,y)
+	local col = math.floor(x / self.tileSize)
+	local row = math.floor(y / self.tileSize)
+	return self:getBlockType(col,row)
+end
+
+
+function FutureMap:draw(camera)
+	love.graphics.setColor(255,255,255,255)
+	for row = 1, self.rows do
+		for col = 1, self.columns do
+			if self[row][col] ~= 0 then
+				
+				local r = Rect:create( col*self.tileSize - self.tileSize, row*self.tileSize - self.tileSize, self.tileSize, self.tileSize )
+				if camera:collidesWith( r ) then
+					if row == 1 then
+					--print("R:"..row.." C:"..col.." Value:"..self[row][col].."rect["..r.x..","..r.y.." "..r.w.."x"..r.h.."]")
+					end
+					love.graphics.draw( self.images[ self[row][col] ], r.x-camera.x, r.y-camera.y, 0, 1, 1)
+					love.graphics.rectangle( "line", r.x-camera.x, r.y-camera.y, 0, 1, 1)
+				end
+			end
+		end
+	end
+	--love.graphics.rectangle("line", 0,0,40,50)
+end
+
+
+function FutureMap:getBounds()
+	return Rect:create( 0, 0, self.columns*self.tileSize, self.rows*self.tileSize)
+end
 

@@ -27,10 +27,10 @@ function Scene:prevScene()
 	return ""
 end
 
-function Scene:update(dt)
+function Scene:update(dt, player)
 end
 
-function Scene:draw()
+function Scene:draw(camera)
 end
 
 function Scene:moveTo(x,y)

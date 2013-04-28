@@ -27,20 +27,31 @@ function Rect:create(x,y,w,h)
 end
 
 
-function Rect.centerOver(self, r2)
-	self.x = r2.x - (self.w + r2.w / 2)
-	self.y = r2.y - (self.y + r2.h / 2)
-	return self
+function Rect:centerOver(r2)
+	self.x = r2.x - (self.w -r2.w) / 2
+	self.y = r2.y - (self.h -r2.h) / 2
 end
 
 
 function Rect:collidesWith(r2)
-	return ( ( self.x > r2.x and self.x < (r2.x + r2.w) )
-			  and ( (self.y > r2.y) and (self.y < r2.y + r2.h) )
-				or ( (self.y + self.h > r2.y) and (self.y + self.h > r2.y + r2.h) ) )
-			or ( ( self.x + self.w > r2.x and self.x + self.w < (r2.x + r2.w) )
-			  and ( (self.y > r2.y) and (self.y < r2.y + r2.h) )
-				or ( (self.y + self.h > r2.y) and (self.y + self.h > r2.y + r2.h) ) )
+	return
+	  ( ((self.x >= r2.x) and (self.x >= r2.x)) or (self.x + self.w >= r2.x) )
+	  and
+	  ( ((self.y >= r2.y) and (self.y <= r2.y + r2.h)) or (self.y + self.h >= r2.y) )
+end
+
+
+function Rect:keepWithin(r2)
+	if self.x < r2.x then
+		self.x = r2.x
+	elseif self.x + self.w > r2.x + r2.w then
+		self.x = r2.x + r2.w - self.w
+	end
+	if self.y < r2.y then
+		self.y = r2.y
+	elseif self.y + self.h > r2.y + r2.h then
+		self.y = r2.y + r2.h - self.h
+	end
 end
 
 

@@ -18,7 +18,7 @@ function Future:create()
 
 	future.clouds = {}
 	
-	for i=1,100 do
+	for i=1,75 do
 		local x = 0
 		local y = 0
 		local cloud1 = Object:create(
@@ -50,11 +50,8 @@ function Future:create()
 	return future
 end
 
-function Future.createPlayer(p)
-	p.sprite = Content:image("assets/future/player.png")
-	p.x = 20
-	p.y = 300
-	return p
+function Future.createPlayer()
+	return Player:create("assets/future/player.png", 20, 300)
 end
 
 function Future:nextScene()
@@ -67,17 +64,40 @@ function Future:prevScene()
 end
 
 
-function Future:update(dt)
+function Future:update(dt, player)
 	self:updateClouds(dt)
 	self.map:update(dt)
+	if self.map:getTileFromPixel(player.x, player.y) ~= 0 then
+		player.vel.x = 0
+		player.jumpVel = 0
+	elseif self.map:getTileFromPixel(player.x+player.w, player.y) ~= 0 then
+		player.vel.x = 0
+		player.jumpVel = 0
+	elseif self.map:getTileFromPixel(player.x, player.y+player.h) ~= 0 then
+		player.vel.x = 0
+		player.vel.y = 0
+		player.jumpVel = 0
+	elseif self.map:getTileFromPixel(player.x+player.w, player.y+player.h) ~= 0 then
+		player.vel.x = 0
+		player.vel.y = 0
+		player.jumpVel = 0
+	end
+	
+	if self.map:collidesWithTile(player) then
+		player.vel.x = 0
+		player.vel.y = 0
+		player.jumpVel = 0
+	end
 end
 
 
-function Future:updateClouds(dt)
+
+
+function Future:updateClouds(dt, player)
 	love.graphics.setBlendMode("alpha")
 	for i=1,table.getn(self.clouds) do
-		-- If it passed the edge of the screen, tele it to the other end.
-		if self.clouds[i].x < self.camera.x - self.clouds[i].w then
+		-- If it passed the edge of the screen, wrap it to the other side.
+		if self.clouds[i].x < window.x - (self.clouds[i].w * self.clouds[i].scale) then
 			self.clouds[i].x = self.map.columns * self.map.tileSize
 		end
 		self.clouds[i]:update(dt)
@@ -87,7 +107,6 @@ end
 
 
 function Future:draw(camera)
-	self.camera = camera
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.draw(self.background,0,0,0,1,1)
 	love.graphics.setColor(0,0,0,255)
@@ -99,9 +118,8 @@ end
 function Future:drawClouds(camera)
 	for i=1,table.getn(self.clouds) do
 		-- If collides with camera
-		if camera:collidesWith( self.clouds[i] ) then
-		--if camera:collidesWith( Rect:create(1,1,1,1) ) then
-			self.clouds[i]:draw()
+		if window:collidesWith( self.clouds[i] ) then
+			self.clouds[i]:draw(Rect:create(0,camera.y/20,0,0))
 		end
 	end
 end

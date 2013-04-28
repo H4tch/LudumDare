@@ -1,7 +1,9 @@
 
 Content = require "content"
-
 require "util"
+
+window = Rect:create(0,0,love.graphics.getWidth(),love.graphics.getHeight())
+
 require "game"
 
 Keys = {}
@@ -11,7 +13,6 @@ stage["game"] = Game
 currentStage = "game"
 --titleText = love.graphics.newFont("", 40)
 --text = love.graphics.newFont("", 20)
-
 
 
 function love.load()
@@ -68,7 +69,7 @@ end
 
 function love.keyreleased(key)
 	Keys[key] = false
-	--stage[currentStage].onKeyUp(key)
+	stage[currentStage]:onKeyUp(key)
 end
 
 

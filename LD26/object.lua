@@ -31,12 +31,12 @@ function Object:create(sprite, x, y, rot, scale, vX, vY)
 end
 
 
-function Object:draw()
+function Object:draw(camera)
 	if self.opacity ~= 255 then
 		love.graphics.setBlendMode("alpha")
 		love.graphics.setColor(255,255,255,self.opacity)
 	end
-	love.graphics.draw( self.sprite, self.x, self.y, self.rot, self.scale, self.scale )
+	love.graphics.draw( self.sprite, self.x-camera.x, self.y-camera.y, self.rot, self.scale, self.scale )
 end
  
 
