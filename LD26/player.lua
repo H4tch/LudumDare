@@ -2,8 +2,12 @@
 require "util"
 require "object"
 
+
+
 Player = inheritsFrom(Object)
 Player_mt = { __index = Player }
+
+
 
 function Player:create(sprite, x, y)
 	local p = {}--Object.create(sprite, x, y, 0, 1, 0, 0)
@@ -46,10 +50,12 @@ function Player:create(sprite, x, y)
 end
 
 
+
 function Player:draw(camera)
 	--self.sprite = self.sprites[self.spriteFrame]
 	love.graphics.draw( self.sprite, self.x - camera.x, self.y - camera.y, self.rot, self.scale, self.scale )
 end
+
 
 
 function Player:onKeyDown(key, isRepeat)
@@ -72,6 +78,7 @@ function Player:onKeyDown(key, isRepeat)
 end
 
 
+
 function Player:onKeyUp(key, isRepeat)
 	if key == "left" or key == "a" then
 		self.state.left = false
@@ -88,7 +95,9 @@ function Player:onKeyUp(key, isRepeat)
 	end
 end
 
--- brings a value closer to zero
+
+-- brings a value closer to zero for either sign without going
+-- into other sign.
 function Player:slowDown( value, amount )
 	if value == 0 then
 	elseif value > 0 then
@@ -102,9 +111,9 @@ function Player:slowDown( value, amount )
 			value = 0
 		end
 	end
---	print ("set value to "..value)
 	return value
 end
+
 
 
 function Player:update(dt)
@@ -121,7 +130,7 @@ function Player:update(dt)
 	
 	if self.vel.x ~= 0
 	  and ( self.state.left == false
-	  or self.state.right == false ) then
+		or self.state.right == false ) then
 		self.vel.x = self:slowDown( self.vel.x, 5 )
 	end
 	

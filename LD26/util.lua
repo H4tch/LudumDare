@@ -55,6 +55,12 @@ function Rect:keepWithin(r2)
 end
 
 
+function Rect:print()
+	print("("..self.x..","..self.y..")["..self.w.."x"..self.h.."]")
+end
+
+
+
 Vec = {}
 Vec_mt = { __index = Vec }
 

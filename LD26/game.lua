@@ -14,6 +14,15 @@ function Game:init()
 	Game.currentScene = "future"
 	Game.player = Game.scene[Game.currentScene].createPlayer()
 	Game.camera = Rect:create( 0, 0, window.w, window.h )
+	
+	--print("Map tileSize: "..Game.scene[Game.currentScene].map.tileSize)
+	--print(Game.scene[Game.currentScene].tileSize)
+	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(0,0,32,32) ):print()
+	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(1,1,32,32) ):print()
+	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(31,31,32,32) ):print()
+	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,32,32) ):print()
+	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,0,0) ):print()
+	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(33,33,32,32) ):print()
 end
 
 

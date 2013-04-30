@@ -40,8 +40,8 @@ function FutureMap:load()
 		,[3]= love.graphics.newImage("assets/future/ground1.png")
 	}
 	
-	local height = math.ceil( love.graphics.getHeight() )
-	map.tileSize = math.ceil( height / map.rows )
+	map.tileSize = 32
+	--map.tileSize = math.ceil( window.h / map.rows )
 	
 	return map
 end
@@ -55,14 +55,55 @@ function FutureMap:update(dt)
 end
 
 
-function FutureMap:collidesWithTile(rect)
-	local col1 = math.ceil(rect.x / self.tileSize)
-	local col2 = math.ceil(rect.x + rect.w / self.tileSize)
-	local row1 = math.ceil(rect.y / self.tileSize)
-	local row2 = math.ceil(rect.y + rect.h / self.tileSize)
-	for c=col1,col2 do
-		for r=row1,row2 do
+--todo add position for map
+--map size is limited since it is only positive cooridinates
+function FutureMap:tilesCollidingWithRect( rect )
+	-- This box holds (col1,row1,col2,row2) which represents the tiles
+	-- the rect intersects
+	local box = Rect:create(
+		math.floor((rect.x) / self.tileSize) + 1
+		,math.floor((rect.y) / self.tileSize) + 1
+		,math.floor((rect.x + rect.w-1) / self.tileSize) + 1
+		,math.floor((rect.y + rect.h-1) / self.tileSize) + 1
+		)
+	if box.x < 1 then box.x = 1 end
+	if box.y < 1 then box.y = 1 end
+	if box.w > self.columns then box.w = self.columns end
+	if box.h > self.rows then box.h = self.rows end
+	
+	if box.w < box.x then box.w = box.x end
+	if box.h < box.y then box.h = box.y end
+	
+	if box.w < 1 then box.w = 1 end
+	if box.h < 1 then box.h = 1 end
+	if box.x > self.columns then box.x = self.columns end
+	if box.y > self.rows then box.y = self.rows end
+	return box
+end
+
+
+function FutureMap:edgeCollidesWithTile(x1,y1,x2,y2)
+	local box = self:tilesCollidingWithRect(Rect:create(x1,y1,x2-x1,y2-y1))
+	for c=box.x,box.w do
+		for r=box.y,box.h do
 			if self:getBlockType(c, r) ~= 0 then
+				--print("Edge Collided with "..self:getBlockType(c, r).." at "..c..","..r)
+				return true
+			end
+		end
+	end
+end
+
+
+function FutureMap:collidesWithTile(rect)
+	local box = self:tilesCollidingWithRect( rect )
+	
+	print("Player collides with these coordinates "..box.x..","..box.y.." "..box.w..","..box.h)
+	
+	for c=box.x,box.w do
+		for r=box.y,box.h do
+			if self:getBlockType(c, r) ~= 0 then
+				print("collided")
 		--		return true
 			end
 		end
@@ -71,41 +112,32 @@ end
 
 
 function FutureMap:getBlockType(col, row)
-	if self[col] then
-		block = self[col][row]
+	if self[row] then
+		block = self[row][col]
 	end
-	if block then
-		return block else
-	return 0
-	end
+	return (block or 0)
 end
 
 
 function FutureMap:getTileFromPixel(x,y)
 	local col = math.floor(x / self.tileSize)
 	local row = math.floor(y / self.tileSize)
+	if col < 1 then col = 1 end
+	if row < 1 then row = 1 end
 	return self:getBlockType(col,row)
 end
 
 
 function FutureMap:draw(camera)
 	love.graphics.setColor(255,255,255,255)
-	for row = 1, self.rows do
-		for col = 1, self.columns do
-			if self[row][col] ~= 0 then
-				
-				local r = Rect:create( col*self.tileSize - self.tileSize, row*self.tileSize - self.tileSize, self.tileSize, self.tileSize )
-				if camera:collidesWith( r ) then
-					if row == 1 then
-					--print("R:"..row.." C:"..col.." Value:"..self[row][col].."rect["..r.x..","..r.y.." "..r.w.."x"..r.h.."]")
-					end
-					love.graphics.draw( self.images[ self[row][col] ], r.x-camera.x, r.y-camera.y, 0, 1, 1)
-					love.graphics.rectangle( "line", r.x-camera.x, r.y-camera.y, 0, 1, 1)
-				end
-			end
+	box = self:tilesCollidingWithRect(camera)
+	for c=box.x,box.w do
+		for r=box.y,box.h do
+			local b = Rect:create( c*self.tileSize - self.tileSize, r*self.tileSize - self.tileSize, self.tileSize )
+			love.graphics.draw( self.images[ self[r][c] ], b.x-camera.x, b.y-camera.y, 0, 1, 1)
+			love.graphics.print( c..","..r, b.x-camera.x, b.y-camera.y, 0, .75, .75)
 		end
 	end
-	--love.graphics.rectangle("line", 0,0,40,50)
 end
 
 

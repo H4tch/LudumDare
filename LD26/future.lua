@@ -51,7 +51,7 @@ function Future:create()
 end
 
 function Future.createPlayer()
-	return Player:create("assets/future/player.png", 20, 300)
+	return Player:create("assets/future/player.png", 64, 416)
 end
 
 function Future:nextScene()
@@ -66,7 +66,9 @@ end
 
 function Future:update(dt, player)
 	self:updateClouds(dt)
+	
 	self.map:update(dt)
+--[[
 	if self.map:getTileFromPixel(player.x, player.y) ~= 0 then
 		player.vel.x = 0
 		player.jumpVel = 0
@@ -82,12 +84,35 @@ function Future:update(dt, player)
 		player.vel.y = 0
 		player.jumpVel = 0
 	end
+--]]
+--	if self.map:collidesWithTile(player) then
+--		player.vel.x = 0
+--		player.vel.y = 0
+--		player.jumpVel = 0
+--	end
 	
-	if self.map:collidesWithTile(player) then
-		player.vel.x = 0
+	-- Check edges
+	--top
+	if self.map:edgeCollidesWithTile(player.x, player.y, player.x+player.w, player.y) then
+		print("top")
 		player.vel.y = 0
-		player.jumpVel = 0
 	end
+	--right
+	if self.map:edgeCollidesWithTile(player.x+player.w, player.y, player.x+player.w, player.y+player.h) then
+		print("right")
+		player.vel.x = 0
+	end
+	--bottom
+	if self.map:edgeCollidesWithTile(player.x, player.y+player.h, player.x+player.w, player.y+player.h) then
+		print("bottom")
+		player.vel.y = 0
+	end
+	--left
+	if self.map:edgeCollidesWithTile(player.x, player.y, player.x, player.y+player.h) then
+		print("left")
+		player.vel.x = 0
+	end
+	
 end
 
 

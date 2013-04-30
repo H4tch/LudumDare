@@ -23,16 +23,16 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=2
+current_page=10
 FILE_NAME_0=137;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fmain.lua;0;4
 FILE_NAME_1=853;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Futil.lua;0;4
-FILE_NAME_2=418;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fcontent.lua;0;4
-FILE_NAME_3=591;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fgame.lua;0;4
-FILE_NAME_4=382;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ffuture.lua;0;4
-FILE_NAME_5=1801;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ffuture_map.lua;0;4
+FILE_NAME_2=214;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fcontent.lua;0;4
+FILE_NAME_3=97;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fgame.lua;0;4
+FILE_NAME_4=2168;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ffuture.lua;0;4
+FILE_NAME_5=2070;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ffuture_map.lua;0;4
 FILE_NAME_6=0;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fintro.lua;0;4
 FILE_NAME_7=0;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fobject.lua;0;4
-FILE_NAME_8=1476;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fplayer.lua;0;4
+FILE_NAME_8=99;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fplayer.lua;0;4
 FILE_NAME_9=0;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fscene.lua;0;4
 FILE_NAME_10=45;None;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fassets%2Ffuture%2Fmap.dat;0;4
 
