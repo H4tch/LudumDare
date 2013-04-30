@@ -18,7 +18,7 @@ function Future:create()
 
 	future.clouds = {}
 	
-	for i=1,75 do
+	for i=1,100 do
 		local x = 0
 		local y = 0
 		local cloud1 = Object:create(
@@ -68,49 +68,33 @@ function Future:update(dt, player)
 	self:updateClouds(dt)
 	
 	self.map:update(dt)
---[[
-	if self.map:getTileFromPixel(player.x, player.y) ~= 0 then
-		player.vel.x = 0
-		player.jumpVel = 0
-	elseif self.map:getTileFromPixel(player.x+player.w, player.y) ~= 0 then
-		player.vel.x = 0
-		player.jumpVel = 0
-	elseif self.map:getTileFromPixel(player.x, player.y+player.h) ~= 0 then
-		player.vel.x = 0
-		player.vel.y = 0
-		player.jumpVel = 0
-	elseif self.map:getTileFromPixel(player.x+player.w, player.y+player.h) ~= 0 then
-		player.vel.x = 0
-		player.vel.y = 0
-		player.jumpVel = 0
-	end
---]]
---	if self.map:collidesWithTile(player) then
---		player.vel.x = 0
---		player.vel.y = 0
---		player.jumpVel = 0
---	end
-	
-	-- Check edges
+	-- Todo: Check player's corners.
+	-- Check Player's edges to see if they collide.
 	--top
-	if self.map:edgeCollidesWithTile(player.x, player.y, player.x+player.w, player.y) then
-		print("top")
+	if self.map:edgeCollidesWithTile(player.x+5, player.y, player.x+player.w-5, player.y) then
 		player.vel.y = 0
+		player.jumpVel = 0
+		player.state.isJumping = false
+		_,y = self.map:getAlignedPixel( player.x, player.y)
+		player.y = y + self.map.tileSize
 	end
 	--right
-	if self.map:edgeCollidesWithTile(player.x+player.w, player.y, player.x+player.w, player.y+player.h) then
-		print("right")
+	if self.map:edgeCollidesWithTile(player.x+player.w, player.y+5, player.x+player.w, player.y+player.h-5) then
 		player.vel.x = 0
+		x,_ = self.map:getAlignedPixel( player.x + player.w, player.y)
+		player.x = x - player.w
 	end
 	--bottom
-	if self.map:edgeCollidesWithTile(player.x, player.y+player.h, player.x+player.w, player.y+player.h) then
-		print("bottom")
+	if self.map:edgeCollidesWithTile(player.x+5, player.y+player.h, player.x+player.w-5, player.y+player.h) then
 		player.vel.y = 0
+		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
+		player.y = y - player.h
 	end
 	--left
-	if self.map:edgeCollidesWithTile(player.x, player.y, player.x, player.y+player.h) then
-		print("left")
+	if self.map:edgeCollidesWithTile(player.x, player.y+5, player.x, player.y+player.h-5) then
 		player.vel.x = 0
+		x,_ = self.map:getAlignedPixel( player.x, player.y)
+		player.x = x + self.map.tileSize
 	end
 	
 end

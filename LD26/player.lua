@@ -10,7 +10,7 @@ Player_mt = { __index = Player }
 
 
 function Player:create(sprite, x, y)
-	local p = {}--Object.create(sprite, x, y, 0, 1, 0, 0)
+	local p = {}
 	p.state = {
 		[""]=false
 		,["left"]=false
@@ -19,8 +19,9 @@ function Player:create(sprite, x, y)
 		,["down"]=false
 		,["isRunning"]=false
 		,["isJumping"]=false
-		,["inAir"]=false
+		,["inAir"]=true
 	}
+	p.jumpVel = 0
 	p.x = x or 0
 	p.y = y or 0
 	p.scale = scale,1
@@ -87,8 +88,8 @@ function Player:onKeyUp(key, isRepeat)
 		self.state.right = false
 		--self.x = self.x + 4
 	elseif key == " " then
-		if not self.state.inAir then
-			self.state.isJumping = false
+		if self.state.inAir == true then
+			self.jumpVel = 0
 		end
 	elseif key == "lshift" or key == "rshift" then
 		self.state.isRunning = false

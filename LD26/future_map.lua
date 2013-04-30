@@ -37,7 +37,6 @@ function FutureMap:load()
 		[0]=Content.BlankTexture
 		,[1]=I("ground1.png")
 		,[2]=I("ground2.png")
-		,[3]= love.graphics.newImage("assets/future/ground1.png")
 	}
 	
 	map.tileSize = 32
@@ -128,14 +127,27 @@ function FutureMap:getTileFromPixel(x,y)
 end
 
 
+function FutureMap:getAlignedPixel(x,y)
+	x = math.floor(x / self.tileSize) * self.tileSize
+	y = math.floor(y / self.tileSize) * self.tileSize
+	return x,y
+end
+
+
 function FutureMap:draw(camera)
-	love.graphics.setColor(255,255,255,255)
 	box = self:tilesCollidingWithRect(camera)
 	for c=box.x,box.w do
 		for r=box.y,box.h do
 			local b = Rect:create( c*self.tileSize - self.tileSize, r*self.tileSize - self.tileSize, self.tileSize )
-			love.graphics.draw( self.images[ self[r][c] ], b.x-camera.x, b.y-camera.y, 0, 1, 1)
-			love.graphics.print( c..","..r, b.x-camera.x, b.y-camera.y, 0, .75, .75)
+			tile = self.images[ self[r][c] ]
+			if tile ~= nil then
+				love.graphics.setColor(255,255,255,255)
+				love.graphics.draw( tile, b.x-camera.x, b.y-camera.y, 0, 1, 1)
+			else
+				love.graphics.setColor(0,0,0,255)
+				love.graphics.rectangle( "line", b.x-camera.x, b.y-camera.y, self.tileSize, self.tileSize, 0, 1, 1)
+			end
+			--love.graphics.print( c..","..r, b.x-camera.x, b.y-camera.y, 0, .75, .75)
 		end
 	end
 end

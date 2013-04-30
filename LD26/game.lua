@@ -17,12 +17,9 @@ function Game:init()
 	
 	--print("Map tileSize: "..Game.scene[Game.currentScene].map.tileSize)
 	--print(Game.scene[Game.currentScene].tileSize)
-	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(0,0,32,32) ):print()
-	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(1,1,32,32) ):print()
-	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(31,31,32,32) ):print()
-	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,32,32) ):print()
-	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,0,0) ):print()
-	Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(33,33,32,32) ):print()
+	--Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,0,0) ):print()
+	x,y = Game.scene[Game.currentScene].map:getAlignedPixel( 100, 200 )
+	print(x..","..y)
 end
 
 
@@ -38,8 +35,8 @@ function Game.update(dt)
 	
 	--Game.scene[Game.currentScene]:update(Game.player)
 	
-	--print(Game.player.x..","..Game.player.y.."  "..Game.player.w.."x"..Game.player.h)
-	--print(Game.camera.x..","..Game.camera.y.."  "..Game.camera.w.."x"..Game.camera.h)
+	--Game.camera:print()
+	Rect.print(Game.player)
 end
 
 

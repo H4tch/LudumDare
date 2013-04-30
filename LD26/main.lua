@@ -42,13 +42,13 @@ end
 
 
 function love.mousereleased(x, y, button)
-	--stage[currentStage].onMouseUp(x,y,button)
+	stage[currentStage].onMouseUp(x,y,button)
 end
 
 
 
 function love.keypressed(key)
-	print (key)
+	--print (key)
 	local isRepeat = false
 	if Keys[key] == true then
 		isRepeat = true
