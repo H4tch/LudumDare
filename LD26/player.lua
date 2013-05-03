@@ -20,6 +20,10 @@ function Player:create(sprite, x, y)
 		,["isRunning"]=false
 		,["isJumping"]=false
 		,["inAir"]=true
+		,["collidesLeft"]=false
+		,["collidesRight"]=false
+		,["collidesTop"]=false
+		,["collidesBottom"]=false
 	}
 	p.jumpVel = 0
 	p.x = x or 0
@@ -83,12 +87,11 @@ end
 function Player:onKeyUp(key, isRepeat)
 	if key == "left" or key == "a" then
 		self.state.left = false
-		--self.x = self.x - 4
 	elseif key == "right" or key == "d" then
 		self.state.right = false
-		--self.x = self.x + 4
 	elseif key == " " then
 		if self.state.inAir == true then
+			self.state.isJumping = false
 			self.jumpVel = 0
 		end
 	elseif key == "lshift" or key == "rshift" then
@@ -103,12 +106,12 @@ function Player:slowDown( value, amount )
 	if value == 0 then
 	elseif value > 0 then
 		value = value - amount
-		if value < 15 then
+		if value < 10 then
 			value = 0
 		end
 	else
 		value = value + amount
-		if value > 15 then
+		if value > 10 then
 			value = 0
 		end
 	end
@@ -134,21 +137,6 @@ function Player:update(dt)
 		or self.state.right == false ) then
 		self.vel.x = self:slowDown( self.vel.x, 5 )
 	end
-	
---[[	
-	if self.state.up then
-		self.vel.y = self.vel.y - 10
-	end
-	if self.state.down then
-		self.vel.y = self.vel.y + 10
-	end
-	
-	if not (self.vel.y == 0)
-	  and self.state.up == false
-	  or self.state.down == false then
-		self.vel.y = self:slowDown( self.vel.y, 5 )
-	end
---]]
 	
 	if self.state.isJumping then
 		self.vel.y = self.vel.y - self.jumpVel

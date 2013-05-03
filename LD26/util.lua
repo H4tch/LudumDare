@@ -17,15 +17,113 @@ Rect = {}
 Rect_mt = { __index = Rect }
 
 function Rect:create(x,y,w,h)
-	r = {}
+	local r = {}
 	setmetatable(r, Rect_mt)
 	r.x = x or 0
 	r.y = y or 0
 	r.w = w or 0
-	r.h = h or 0
+	r.h = h or r.w
 	return r
 end
 
+-- Returns X,Y,W,H
+function Rect:values()
+	return self.x, self.y, self.w, self.h
+end
+
+-- Returns the intersection of two rects
+function Rect.intersection(r1, r2)
+	local r3 = Rect:create(0,0,0,0)
+	if Rect.collidesWith( r1, r2 ) then
+		r3.x = math.max(r2.x, r1.x)
+		r3.y = math.max(r2.y, r1.y)
+		if (r2.x + r2.w <= r1.x + r1.w) then
+			r3.w = (r2.w + r2.x) - r3.x
+		else
+			r3.w = (r1.x + r1.w) - r3.x
+		end
+		if (r2.y + r2.h <= r1.y + r1.h) then
+			r3.h = (r2.h + r2.y) - r3.y
+		else
+			r3.h = (r1.y + r1.h) - r3.y
+		end
+	end
+	return r3
+end
+
+
+function min(...)
+	local m = select(1, ...)
+	for i=2,select("#", ...) do
+		if m > select(i, ...) then
+			m = select(i, ...)
+		end
+	end
+	return m
+end
+
+function max(...)
+	local m = 0
+	for i=1,select("#", ...) do
+		if m < select(i, ...) then
+			m = select(i, ...)
+		end
+	end
+	return m
+end
+
+-- Returns the combination of two rects, resulting in a rect that
+-- encapsulates both of them.
+function Rect.combine(r1, r2)
+	if (r1.w == 0 and r1.h == 0) then
+		return r2
+	elseif (r2.w == 0 and r2.h == 0) then
+		return r1
+	end
+	local r3 = Rect:create(math.min(r1.x, r2.x), math.min(r1.y, r2.y),0,0)
+	r3.w = math.max(r1.w, r2.w) + math.max(r1.x, r2.x) - r3.x
+	r3.h = math.max(r1.h, r2.h) + math.max(r1.y, r2.y) - r3.y
+--	print("x "..r1.x.." "..r2.x)
+--	print("y "..r1.y.." "..r2.y)
+--	print("w "..r1.w.." "..r2.w)
+--	print("h "..r1.h.." "..r2.h)
+--	r3:print()
+	return r3
+end
+
+--[[
+function Rect.combine( ... )
+	local xs = {}
+	local ys = {}
+	local ws = {}
+	local hs = {}
+	for i=1,select("#", ...) do
+		--select(i, ...):print()
+		xs[i] = (select(i, ...).x or 0)
+		ys[i] = (select(i, ...).y or 0)
+		ws[i] = (select(i, ...).w or 0) + select(i, ...).x
+		hs[i] = (select(i, ...).h or 0) + select(i, ...).y
+		print("h "..(select(i, ...).h))
+	end
+	rect = Rect:create( min( unpack(xs) or 0 ), min( unpack(ys) or 0 ), 0, 0 )
+	rect.w = max( unpack(ws) or 0 ) - rect.x
+	rect.h = max( unpack(hs) or 0 ) + (max(unpack(ys) or 0)) - rect.y
+	print("max W "..(max( unpack(ws) or 0 )))
+	print("max H "..(max( unpack(hs) or 0 )))
+	print("max X "..(max(unpack(xs) or 0)))
+	print("max Y "..(max(unpack(ys) or 0)))
+	print("min Y "..rect.y)
+	print()
+	rect:print()
+	return rect
+end
+--]]
+
+-- Checks if two rects are equal
+function Rect.equal(r1,r2)
+	return ( r1.x == r2.x and r1.y == r2.y
+		 and r1.w == r2.w and r1.h == r2.h )
+end
 
 function Rect:centerOver(r2)
 	self.x = r2.x - (self.w -r2.w) / 2
@@ -56,9 +154,9 @@ end
 
 
 function Rect:print()
-	print("("..self.x..","..self.y..")["..self.w.."x"..self.h.."]")
+	print("("..(self.x or "nil")..","..(self.y or "nil")..
+		 ")["..(self.w or "nil").."x"..(self.h or "nil").."]")
 end
-
 
 
 Vec = {}
@@ -66,7 +164,7 @@ Vec_mt = { __index = Vec }
 
 
 function Vec:create(x,y)
-	pos = {}
+	local pos = {}
 	setmetatable(pos, Vec_mt)
 	pos.x = x
 	pos.y = y

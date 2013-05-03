@@ -68,9 +68,22 @@ function Future:update(dt, player)
 	self:updateClouds(dt)
 	
 	self.map:update(dt)
-	-- Todo: Check player's corners.
+
+	local p = player
+	
+	-- The collision detection should work like this:
+	-- 	  get the bounds of the tiles the player collides with.
+	--      -> self.map:tilesCollidingWithRect( player )  
+	-- 	  for each tile, check if the player collides with each side
+
+	-- Todo: Check player's corners?
+	-- Todo: Tiles need methods for collidedOnTop() and so on for each side.
+	-- Need to get the edge the player collides with, not the player's edge
+	-- that collides with a tile.
+
 	-- Check Player's edges to see if they collide.
 	--top
+--[[
 	if self.map:edgeCollidesWithTile(player.x+5, player.y, player.x+player.w-5, player.y) then
 		player.vel.y = 0
 		player.jumpVel = 0
@@ -79,24 +92,96 @@ function Future:update(dt, player)
 		player.y = y + self.map.tileSize
 	end
 	--right
-	if self.map:edgeCollidesWithTile(player.x+player.w, player.y+5, player.x+player.w, player.y+player.h-5) then
+	if player.vel.x > 0 and
+	  self.map:edgeCollidesWithTile(player.x+player.w, player.y+5, player.x+player.w, player.y+player.h-5)
+	  then
 		player.vel.x = 0
-		x,_ = self.map:getAlignedPixel( player.x + player.w, player.y)
-		player.x = x - player.w
+		x,y = self.map:getAlignedPixel( player.x + player.w, player.y)
+		-- this checks to make sure it actually collided with the left
+		-- side of the block
+		if (Rect.collidesWith( Rect:create(player.x,player.y,player.w,player.h),
+		  Rect:create(x,y,1,self.map.tileSize)) ) then
+			player.x = x - player.w
+		end
 	end
 	--bottom
-	if self.map:edgeCollidesWithTile(player.x+5, player.y+player.h, player.x+player.w-5, player.y+player.h) then
+	-- The +5 offset causes a player to fall off a block when he is not
+	-- quite over the edge. If this isn't here though, when the player
+	-- falls and hits a block, it will register as bottom and side collision
+	if self.map:edgeCollidesWithTile(player.x+5, player.y+player.h+1, player.x+player.w-5, player.y+player.h+1) then
 		player.vel.y = 0
 		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
 		player.y = y - player.h
+		player.state.inAir = false
+		player.jumpVel = 0
+		player.state.isJumping = false
+	else
+		player.state.inAir = true
+		-- This would prevent 'double jumping'
+		player.state.inJumping = true
 	end
 	--left
-	if self.map:edgeCollidesWithTile(player.x, player.y+5, player.x, player.y+player.h-5) then
+	if player.vel.x < 0
+	  and self.map:edgeCollidesWithTile(player.x, player.y+5, player.x, player.y+player.h-5)
+	  then
 		player.vel.x = 0
 		x,_ = self.map:getAlignedPixel( player.x, player.y)
 		player.x = x + self.map.tileSize
 	end
+]]--
+
+	-- Todo
+	-- New physics all based on intersection rectangle with map.
+	rect = self.map:getIntersection( player )
 	
+	-- Check Left edge
+	if self.map:edgeCollidesWithTile(player.x, player.y, player.x, player.y+player.h)
+	  then
+		player.vel.x = 0
+		x,y = self.map:getAlignedPixel( player.x, player.y)
+		c,r = self.map:getCellFromPixel(x,y)
+		if self.map:getCell(c,r) ~= 0 and  self.map:getCell(c,r+1) ~= 0
+		  then
+			player.x = x + self.map.tileSize
+		end
+	end
+	--right
+	if player.vel.x > 0 and
+	  self.map:edgeCollidesWithTile(player.x+player.w, player.y+5, player.x+player.w, player.y+player.h-5)
+	  then
+		player.vel.x = 0
+		x,y = self.map:getAlignedPixel( player.x + player.w, player.y)
+		-- this checks if it collided with the left side of the block
+		if (Rect.collidesWith( Rect:create(player.x,player.y,player.w,player.h),
+		  Rect:create(x,y,1,self.map.tileSize)) ) then
+			player.x = x - player.w
+		end
+	end
+	
+	-- top
+	if self.map:edgeCollidesWithTile(player.x+5, player.y, player.x+player.w-5, player.y) then
+		player.vel.y = 0
+		player.jumpVel = 0
+		player.state.isJumping = false
+		_,y = self.map:getAlignedPixel( player.x, player.y)
+		player.y = y + self.map.tileSize
+	end
+	--bottom
+	-- The +5 offset causes a player to fall off a block when he is not
+	-- quite over the edge. If this isn't here though, when the player
+	-- falls and hits a block, it will register as bottom and side collision
+	if self.map:edgeCollidesWithTile(player.x+5, player.y+player.h+1, player.x+player.w-5, player.y+player.h+1) then
+		player.vel.y = 0
+		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
+		player.y = y - player.h
+		player.state.inAir = false
+		player.jumpVel = 0
+		player.state.isJumping = false
+	else
+		player.state.inAir = true
+		-- This would prevent 'double jumping'
+		player.state.inJumping = true
+	end	
 end
 
 
@@ -107,7 +192,7 @@ function Future:updateClouds(dt, player)
 	for i=1,table.getn(self.clouds) do
 		-- If it passed the edge of the screen, wrap it to the other side.
 		if self.clouds[i].x < window.x - (self.clouds[i].w * self.clouds[i].scale) then
-			self.clouds[i].x = self.map.columns * self.map.tileSize
+			self.clouds[i].x = window.x + window.w + math.random(1,140)
 		end
 		self.clouds[i]:update(dt)
 	end
@@ -121,6 +206,7 @@ function Future:draw(camera)
 	love.graphics.setColor(0,0,0,255)
 	self:drawClouds(camera)
 	self.map:draw(camera)
+	--self.map:getIntersection( Rect:create(100,450,100,150) ):print()
 end
 
 

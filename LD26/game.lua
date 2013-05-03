@@ -7,6 +7,7 @@ require "future"
 
 Game = inheritsFrom( Scene )
 
+require "test"
 
 function Game:init()
 	Game.scene = {}
@@ -18,8 +19,8 @@ function Game:init()
 	--print("Map tileSize: "..Game.scene[Game.currentScene].map.tileSize)
 	--print(Game.scene[Game.currentScene].tileSize)
 	--Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,0,0) ):print()
-	x,y = Game.scene[Game.currentScene].map:getAlignedPixel( 100, 200 )
-	print(x..","..y)
+	x,y = Game.scene[Game.currentScene].map:getAlignedPixel(500, 200 )
+	c,r = Game.scene[Game.currentScene].map:getCellFromPixel(x, y)
 end
 
 
@@ -33,17 +34,21 @@ function Game.update(dt)
 	
 	Game.scene[Game.currentScene]:update(dt, Game.player)
 	
-	--Game.scene[Game.currentScene]:update(Game.player)
-	
 	--Game.camera:print()
-	Rect.print(Game.player)
+	--Rect.print(Game.player)
 end
 
 
 function Game:draw()
 	Game.scene[Game.currentScene]:draw(Game.camera)
+	--Test.rect()
 	Game.player:draw(Game.camera)
 	--drawHud()
+	
+	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(200,480,500,600))
+	love.graphics.setColor(255,255,255,255)
+	local r2 = Game.scene[Game.currentScene].map:getIntersection(Game.player)
+	love.graphics.rectangle("fill", r2:values())
 end
 
 
