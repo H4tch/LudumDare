@@ -158,6 +158,8 @@ function FutureMap:getIntersection(rect)
 			if self:getBlockType(c, r) ~= 0 then
 				-- Get the players intersection with it.
 				tempRect = Rect.intersection(rect, self:getCellBox(c,r))
+				
+				--r2 = tempRect
 				-- Now combine this with all other intersections.
 				r2 = Rect.combine( r2, tempRect )
 			end
@@ -186,7 +188,7 @@ function FutureMap:draw(camera)
 				-- Draw the frame of an unknown block and print its number id.
 				love.graphics.setColor(0,0,0,255)
 				love.graphics.rectangle( "line", b.x-camera.x, b.y-camera.y, self.tileSize, self.tileSize, 0, 1, 1)
-				love.graphics.print( index, b.x-camera.x, b.y-camera.y, 0, 1)
+				love.graphics.print( (index or ""), b.x-camera.x, b.y-camera.y, 0, 1)
 			end
 			if index ~= 0 then
 				love.graphics.print( c..","..r, b.x-camera.x, b.y-camera.y, 0, .75, .75, 0, -self.tileSize/2)

@@ -19,7 +19,7 @@ function Game:init()
 	--print("Map tileSize: "..Game.scene[Game.currentScene].map.tileSize)
 	--print(Game.scene[Game.currentScene].tileSize)
 	--Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,0,0) ):print()
-	x,y = Game.scene[Game.currentScene].map:getAlignedPixel(500, 200 )
+	x,y = Game.scene[Game.currentScene].map:getAlignedPixel(500, 200)
 	c,r = Game.scene[Game.currentScene].map:getCellFromPixel(x, y)
 end
 
@@ -41,18 +41,17 @@ end
 
 function Game:draw()
 	Game.scene[Game.currentScene]:draw(Game.camera)
-	--Test.rect()
+	Test.rect()
 	Game.player:draw(Game.camera)
 	--drawHud()
 	
 	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(200,480,500,600))
 	love.graphics.setColor(255,255,255,255)
-	local r2 = Game.scene[Game.currentScene].map:getIntersection(Game.player)
-	love.graphics.rectangle("fill", r2:values())
-end
-
-
-function Game:moveTo(x,y)
+	local p = Game.player
+	--Rect.print(p)
+	local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x-5,p.y-5,p.w+10,p.h+10))
+	--r2:print()
+	love.graphics.rectangle("fill", r2.x-Game.camera.x, r2.y-Game.camera.y, r2.w, r2.h)
 end
 
 

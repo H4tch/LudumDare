@@ -72,6 +72,7 @@ function max(...)
 	return m
 end
 
+
 -- Returns the combination of two rects, resulting in a rect that
 -- encapsulates both of them.
 function Rect.combine(r1, r2)
@@ -81,15 +82,11 @@ function Rect.combine(r1, r2)
 		return r1
 	end
 	local r3 = Rect:create(math.min(r1.x, r2.x), math.min(r1.y, r2.y),0,0)
-	r3.w = math.max(r1.w, r2.w) + math.max(r1.x, r2.x) - r3.x
-	r3.h = math.max(r1.h, r2.h) + math.max(r1.y, r2.y) - r3.y
---	print("x "..r1.x.." "..r2.x)
---	print("y "..r1.y.." "..r2.y)
---	print("w "..r1.w.." "..r2.w)
---	print("h "..r1.h.." "..r2.h)
---	r3:print()
+	r3.w = math.max(r1.w + r1.x, r2.w + r2.x) - r3.x
+	r3.h = math.max(r1.h + r1.y, r2.h + r2.y) - r3.y
 	return r3
 end
+
 
 --[[
 function Rect.combine( ... )
@@ -131,7 +128,16 @@ function Rect:centerOver(r2)
 end
 
 
-function Rect:collidesWith(r2)
+function Rect.collidesWith(r1, r2)
+	return
+	  ( ((r1.x >= r2.x) and (r1.x >= r2.x)) or (r1.x + r1.w >= r2.x) )
+	  and
+	  ( ((r1.y >= r2.y) and (r1.y <= r2.y + r2.h)) or (r1.y + r1.h >= r2.y) )
+end
+
+
+-- Alias for Rect:collidesWith
+function Rect:intersects(r2)
 	return
 	  ( ((self.x >= r2.x) and (self.x >= r2.x)) or (self.x + self.w >= r2.x) )
 	  and

@@ -130,17 +130,21 @@ function Future:update(dt, player)
 	end
 ]]--
 
-	-- Todo
-	-- New physics all based on intersection rectangle with map.
 	rect = self.map:getIntersection( player )
-	
+
+	if Rect.intersects(rect, Rect:create(p.x, p.y, 1, p.h)) then
+		print "Left collision"
+	end
 	-- Check Left edge
 	if self.map:edgeCollidesWithTile(player.x, player.y, player.x, player.y+player.h)
 	  then
 		player.vel.x = 0
 		x,y = self.map:getAlignedPixel( player.x, player.y)
 		c,r = self.map:getCellFromPixel(x,y)
-		if self.map:getCell(c,r) ~= 0 and  self.map:getCell(c,r+1) ~= 0
+		
+		if self.map:getCell(c,r) ~= 0
+		  and (self.map:getCell(c,r+1) ~= 0
+		    or self.map:getCell(c,r+1) ~= 0)
 		  then
 			player.x = x + self.map.tileSize
 		end
