@@ -41,27 +41,18 @@ end
 
 function Game:draw()
 	Game.scene[Game.currentScene]:draw(Game.camera)
-	Test.rect()
+	--Test.rect()
 	Game.player:draw(Game.camera)
 	--drawHud()
 	
 	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(200,480,500,600))
 	love.graphics.setColor(255,255,255,255)
 	
-	local p = Game.player
+	--local p = Game.player
 	--Rect.print(p)
-	local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x-5,p.y-5,p.w+10,p.h+10))
-	--r2:print()
-	love.graphics.rectangle("fill", r2.x-Game.camera.x, r2.y-Game.camera.y, r2.w, r2.h)
-	
-	local lEdge = Rect:create(p.x, p.y, 2, p.h)
-	if Rect.intersects(r2, lEdge) then
-		print "Left collision"
-		love.graphics.setColor(255,0,255,255)
-		love.graphics.rectangle("fill", lEdge:offset(Game.camera):values())
-		love.graphics.rectangle("fill", r2:offset(Game.camera):values())
-	end
-	
+	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x-5,p.y-5,p.w+10,p.h+10))
+	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x,p.y,p.w,p.h))
+	--love.graphics.rectangle("fill", r2.x-Game.camera.x, r2.y-Game.camera.y, r2.w, r2.h)	
 end
 
 

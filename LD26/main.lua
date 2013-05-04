@@ -28,6 +28,7 @@ end
 
 
 function love.draw()
+	love.graphics.setCanvas()
 	love.graphics.clear()
 	stage[currentStage].draw()
 	love.graphics.setColor(255,255,255,255)

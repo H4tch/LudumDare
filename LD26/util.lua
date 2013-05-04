@@ -26,9 +26,21 @@ function Rect:create(x,y,w,h)
 	return r
 end
 
+function Rect:print()
+	print("("..(self.x or "nil")..","..(self.y or "nil")..
+		 ")["..(self.w or "nil").."x"..(self.h or "nil").."]")
+end
+
 -- Returns X,Y,W,H
 function Rect:values()
 	return self.x, self.y, self.w, self.h
+end
+
+-- Offsets a rect's position  by another rects position
+function Rect:offset( r2 )
+	self.x = self.x - r2.x
+	self.y = self.y - r2.y
+	return self
 end
 
 -- Returns the intersection of two rects
@@ -37,39 +49,10 @@ function Rect.intersection(r1, r2)
 	if Rect.collidesWith( r1, r2 ) then
 		r3.x = math.max(r2.x, r1.x)
 		r3.y = math.max(r2.y, r1.y)
-		if (r2.x + r2.w <= r1.x + r1.w) then
-			r3.w = (r2.w + r2.x) - r3.x
-		else
-			r3.w = (r1.x + r1.w) - r3.x
-		end
-		if (r2.y + r2.h <= r1.y + r1.h) then
-			r3.h = (r2.h + r2.y) - r3.y
-		else
-			r3.h = (r1.y + r1.h) - r3.y
-		end
+		r3.w = math.min((r2.x + r2.w), (r1.x + r1.w)) - r3.x
+		r3.h = math.min((r2.y + r2.h), (r1.y + r1.h)) - r3.y
 	end
 	return r3
-end
-
-
-function min(...)
-	local m = select(1, ...)
-	for i=2,select("#", ...) do
-		if m > select(i, ...) then
-			m = select(i, ...)
-		end
-	end
-	return m
-end
-
-function max(...)
-	local m = 0
-	for i=1,select("#", ...) do
-		if m < select(i, ...) then
-			m = select(i, ...)
-		end
-	end
-	return m
 end
 
 
@@ -85,13 +68,6 @@ function Rect.combine(r1, r2)
 	r3.w = math.max(r1.w + r1.x, r2.w + r2.x) - r3.x
 	r3.h = math.max(r1.h + r1.y, r2.h + r2.y) - r3.y
 	return r3
-end
-
--- Offsets a rect's position  by another rects position
-function Rect:offset( r2 )
-	self.x = self.x - r2.x
-	self.y = self.y - r2.y
-	return self
 end
 
 --[[
@@ -134,20 +110,24 @@ function Rect:centerOver(r2)
 end
 
 
-function Rect.collidesWith(r1, r2)
+-- Checks if Two Rects intersect.
+function Rect.intersects(r1, r2)
 	return
-	  ( ((r1.x >= r2.x) and (r1.x <= r2.x + r2.w)) or ((r1.x < r2.x) and r1.x + r1.w >= r2.x) )
+	  ( ((r1.x >= r2.x) and (r1.x <= r2.x + r2.w))
+			or ((r1.x < r2.x) and r1.x + r1.w >= r2.x) )
 	  and
-	  ( ((r1.y >= r2.y) and (r1.y <= r2.y + r2.h)) or ((r1.y < r2.y) and r1.y + r1.h >= r2.y) )
+	  ( ((r1.y >= r2.y) and (r1.y <= r2.y + r2.h))
+			or ((r1.y < r2.y) and r1.y + r1.h >= r2.y) )
 end
 
-
--- Alias for Rect:collidesWith except it is non-inclusive
-function Rect:intersects(r2)
+-- Deprecated
+function Rect.collidesWith(r1, r2)
 	return
-	  ( ((self.x > r2.x) and (self.x < r2.x + r2.w)) or ((self.x < r2.x) and self.x + self.w > r2.x) )
+	  ( ((r1.x >= r2.x) and (r1.x <= r2.x + r2.w))
+			or ((r1.x < r2.x) and r1.x + r1.w >= r2.x) )
 	  and
-	  ( ((self.y > r2.y) and (self.y < r2.y + r2.h)) or ((self.y < r2.y) and self.y + self.h > r2.y) )
+	  ( ((r1.y >= r2.y) and (r1.y <= r2.y + r2.h))
+			or ((r1.y < r2.y) and r1.y + r1.h >= r2.y) )
 end
 
 
@@ -164,11 +144,6 @@ function Rect:keepWithin(r2)
 	end
 end
 
-
-function Rect:print()
-	print("("..(self.x or "nil")..","..(self.y or "nil")..
-		 ")["..(self.w or "nil").."x"..(self.h or "nil").."]")
-end
 
 
 Vec = {}

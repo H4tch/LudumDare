@@ -39,10 +39,38 @@ function FutureMap:load()
 		[0]=Content.BlankTexture
 		,[1]=I("ground1.png")
 		,[2]=I("ground2.png")
+		,[3]=I("rock1.png")
 	}
-	
 	map.tileSize = 64
-	map.scale = map.tileSize / map.images[1]:getWidth()
+	map.tileRes = 8
+	map.scale = 1
+	
+	local scale = 0
+	local newImage
+	
+	-- For each texture, resize it so it matches the tileSize and target resolution.
+	for i,v in ipairs(map.images) do
+		-- Minify
+		if v:getWidth() ~= map.tileRes then
+			scale = map.tileRes / v:getWidth()
+			newImage = love.graphics.newCanvas(map.tileRes, map.tileRes)
+			love.graphics.setCanvas(newImage)
+			love.graphics.draw(v, 0, 0, 0, scale, scale)
+			v = love.graphics.newImage(newImage:getImageData())
+			map.images[i] = v
+		end
+		-- Embrace pixelization!
+		v:setFilter("nearest","nearest")
+		-- Magnify
+		if v:getWidth() ~= map.tileSize then
+			scale = map.tileSize / v:getWidth()
+			newImage = love.graphics.newCanvas(map.tileSize, map.tileSize)
+			love.graphics.setCanvas(newImage)
+			love.graphics.draw(v, 0, 0, 0, scale, scale)
+			map.images[i] = love.graphics.newImage(newImage:getImageData())
+		end
+	end
+	
 	
 	return map
 end
@@ -179,19 +207,21 @@ function FutureMap:draw(camera)
 	for c=box.x,box.w do
 		for r=box.y,box.h do
 			local b = self:getCellBox(c,r)
-			index = self[r][c]
+			if self[r] then
+				index = self[r][c]
+			end
 			tile = self.images[ index ]
 			if tile ~= nil then
 				love.graphics.setColor(255,255,255,255)
 				love.graphics.draw( tile, b.x-camera.x, b.y-camera.y, 0, self.scale)
+				--if index ~= 0 then
+				--	love.graphics.print( c.."."..r, b.x-camera.x, b.y-camera.y, 0, .75, .75, 0, -self.tileSize/2)
+				--end
 			else
 				-- Draw the frame of an unknown block and print its number id.
 				love.graphics.setColor(0,0,0,255)
 				love.graphics.rectangle( "line", b.x-camera.x, b.y-camera.y, self.tileSize, self.tileSize, 0, 1, 1)
 				love.graphics.print( (index or ""), b.x-camera.x, b.y-camera.y, 0, 1)
-			end
-			if index ~= 0 then
-				love.graphics.print( c..","..r, b.x-camera.x, b.y-camera.y, 0, .75, .75, 0, -self.tileSize/2)
 			end
 		end
 	end

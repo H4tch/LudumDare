@@ -70,111 +70,45 @@ function Future:update(dt, player)
 	self.map:update(dt)
 
 	local p = player
+	local x = 0
+	local y = 0
 	
-	-- The collision detection should work like this:
-	-- 	  get the bounds of the tiles the player collides with.
-	--      -> self.map:tilesCollidingWithRect( player )  
-	-- 	  for each tile, check if the player collides with each side
-
-	-- Todo: Check player's corners?
-	-- Todo: Tiles need methods for collidedOnTop() and so on for each side.
-	-- Need to get the edge the player collides with, not the player's edge
-	-- that collides with a tile.
-
-	-- Check Player's edges to see if they collide.
-	--top
---[[
-	if self.map:edgeCollidesWithTile(player.x+5, player.y, player.x+player.w-5, player.y) then
-		player.vel.y = 0
-		player.jumpVel = 0
-		player.state.isJumping = false
-		_,y = self.map:getAlignedPixel( player.x, player.y)
-		player.y = y + self.map.tileSize
-	end
-	--right
-	if player.vel.x > 0 and
-	  self.map:edgeCollidesWithTile(player.x+player.w, player.y+5, player.x+player.w, player.y+player.h-5)
-	  then
-		player.vel.x = 0
-		x,y = self.map:getAlignedPixel( player.x + player.w, player.y)
-		-- this checks to make sure it actually collided with the left
-		-- side of the block
-		if (Rect.collidesWith( Rect:create(player.x,player.y,player.w,player.h),
-		  Rect:create(x,y,1,self.map.tileSize)) ) then
-			player.x = x - player.w
-		end
-	end
-	--bottom
-	-- The +5 offset causes a player to fall off a block when he is not
-	-- quite over the edge. If this isn't here though, when the player
-	-- falls and hits a block, it will register as bottom and side collision
-	if self.map:edgeCollidesWithTile(player.x+5, player.y+player.h+1, player.x+player.w-5, player.y+player.h+1) then
-		player.vel.y = 0
-		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
-		player.y = y - player.h
-		player.state.inAir = false
-		player.jumpVel = 0
-		player.state.isJumping = false
-	else
-		player.state.inAir = true
-		-- This would prevent 'double jumping'
-		player.state.inJumping = true
-	end
-	--left
-	if player.vel.x < 0
-	  and self.map:edgeCollidesWithTile(player.x, player.y+5, player.x, player.y+player.h-5)
-	  then
-		player.vel.x = 0
-		x,_ = self.map:getAlignedPixel( player.x, player.y)
-		player.x = x + self.map.tileSize
-	end
-]]--
-
 	rect = self.map:getIntersection( player )
-	
-	if Rect.intersects(rect, Rect:create(p.x, p.y, 1, p.h)) then
-	end
-	
-	-- Check Left edge
-	if self.map:edgeCollidesWithTile(player.x, player.y, player.x, player.y+player.h)
-	  then
-		player.vel.x = 0
-		x,y = self.map:getAlignedPixel( player.x, player.y)
-		c,r = self.map:getCellFromPixel(x,y)
-		
-		if self.map:getCell(c,r) ~= 0
-		  and (self.map:getCell(c,r+1) ~= 0
-		    or self.map:getCell(c,r+1) ~= 0)
-		  then
+--[[
+	-- Check Left edge.
+	if Rect.collidesWith(rect, Rect:create(p.x, p.y, 2, p.h)) then
+		if math.floor(rect.w) == math.floor(p.w) then
+		elseif rect.w < rect.h then
+			print "left collided with wall"
+			p.vel.x = 0
+			x,_ = self.map:getAlignedPixel( p.x, p.y)
 			player.x = x + self.map.tileSize
 		end
-	end
-	--right
-	if player.vel.x > 0 and
-	  self.map:edgeCollidesWithTile(player.x+player.w, player.y+5, player.x+player.w, player.y+player.h-5)
-	  then
-		player.vel.x = 0
-		x,y = self.map:getAlignedPixel( player.x + player.w, player.y)
-		-- this checks if it collided with the left side of the block
-		if (Rect.collidesWith( Rect:create(player.x,player.y,player.w,player.h),
-		  Rect:create(x,y,1,self.map.tileSize)) ) then
-			player.x = x - player.w
+	-- Check Right edge.
+	elseif Rect.collidesWith(rect, Rect:create(p.x+p.w-1, p.y, 3, p.h)) then
+		--if math.floor(rect.x+rect.w) == math.floor(p.x+p.w) then
+		if rect.w < rect.h then
+			print "right collided with wall"
+			p.vel.x = 0
+			x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
+			p.x = x - p.w
 		end
 	end
 	
-	-- top
-	if self.map:edgeCollidesWithTile(player.x+5, player.y, player.x+player.w-5, player.y) then
-		player.vel.y = 0
-		player.jumpVel = 0
-		player.state.isJumping = false
-		_,y = self.map:getAlignedPixel( player.x, player.y)
-		player.y = y + self.map.tileSize
-	end
-	--bottom
-	-- The +5 offset causes a player to fall off a block when he is not
-	-- quite over the edge. If this isn't here though, when the player
-	-- falls and hits a block, it will register as bottom and side collision
-	if self.map:edgeCollidesWithTile(player.x+5, player.y+player.h+1, player.x+player.w-5, player.y+player.h+1) then
+	-- Check Top edge.
+	if Rect.collidesWith(rect, Rect:create(p.x, p.y, p.w, 2)) then
+		if math.floor(rect.y + rect.h) == math.floor(p.y + p.h) then
+		elseif rect.w > rect.h then
+			print "top collided with ceiling"
+			p.vel.y = 0
+			p.jumpVel = 0
+			p.state.isJumping = false
+			_,y = self.map:getAlignedPixel( p.x, p.y)
+			p.y = y + self.map.tileSize
+		end
+--]]
+	-- Check Bottom edge.
+--[[	elseif self.map:edgeCollidesWithTile(player.x, player.y+player.h+1, player.x+player.w, player.y+player.h+1) then
 		player.vel.y = 0
 		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
 		player.y = y - player.h
@@ -186,8 +120,75 @@ function Future:update(dt, player)
 		-- This would prevent 'double jumping'
 		player.state.inJumping = true
 	end	
-end
+--]]
+--[[
+	-- Check Bottom edge.
+	elseif Rect.collidesWith(rect, Rect:create(p.x, p.y+p.h, p.w, 2)) then
+	--elseif self.map:edgeCollidesWithTile(player.x, player.y+player.h+1, player.x+player.w, player.y+player.h+1) then
+		if math.floor(rect.y) == math.floor(p.y) then
+		elseif rect.w > rect.h then
+			player.vel.y = 0
+			_,y = self.map:getAlignedPixel( p.x, p.y + p.h)
+			p.y = y - p.h
+			p.state.inAir = false
+			p.jumpVel = 0
+			p.state.isJumping = false
+		--else
+		end
+	else 
+		p.state.inAir = true
+		-- This would prevent 'double jumping'
+		player.state.isJumping = true
+	end
+--]]
 
+
+	-- Check for side collision.
+	if rect.h == p.h and rect.w < rect.h then
+		if rect.w == p.w then
+		-- Left edge.
+		elseif rect.x == p.x then
+			print "left collided with wall"
+			p.vel.x = 0
+			x,_ = self.map:getAlignedPixel( p.x, p.y)
+			player.x = x + self.map.tileSize
+		
+		-- Right edge.
+		elseif rect.x + rect.w == p.x + p.w then
+			print "right collided with wall"
+			p.vel.x = 0
+			x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
+			p.x = x - p.w + .1
+		end
+	end
+	
+	-- rect = self.map:getBottomIntersection()
+	-- rect = self.map:getColumnIntersection()
+	
+	-- Check top and bottom collisions.
+	if rect.w == p.w or rect.w >= rect.h then
+		-- Top edge.
+		if rect.y == p.y then
+			print "top collided with ceiling"
+			p.vel.y = 0
+			p.jumpVel = 0
+			p.state.isJumping = false
+			_,y = self.map:getAlignedPixel( p.x, p.y)
+			p.y = y + self.map.tileSize
+		
+		-- Bottom edge.
+		elseif rect.y + rect.h == p.y + p.h then
+			print "bottom collided with floor"
+			p.vel.y = 0
+			_,y = self.map:getAlignedPixel( p.x, p.y + p.h)
+			p.y = y - p.h
+			--p.state.inAir = false
+			p.jumpVel = 0
+			p.state.isJumping = false
+		end
+	end
+--]]
+end
 
 
 
