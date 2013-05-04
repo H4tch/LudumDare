@@ -87,6 +87,12 @@ function Rect.combine(r1, r2)
 	return r3
 end
 
+-- Offsets a rect's position  by another rects position
+function Rect:offset( r2 )
+	self.x = self.x - r2.x
+	self.y = self.y - r2.y
+	return self
+end
 
 --[[
 function Rect.combine( ... )
@@ -130,18 +136,18 @@ end
 
 function Rect.collidesWith(r1, r2)
 	return
-	  ( ((r1.x >= r2.x) and (r1.x >= r2.x)) or (r1.x + r1.w >= r2.x) )
+	  ( ((r1.x >= r2.x) and (r1.x <= r2.x + r2.w)) or ((r1.x < r2.x) and r1.x + r1.w >= r2.x) )
 	  and
-	  ( ((r1.y >= r2.y) and (r1.y <= r2.y + r2.h)) or (r1.y + r1.h >= r2.y) )
+	  ( ((r1.y >= r2.y) and (r1.y <= r2.y + r2.h)) or ((r1.y < r2.y) and r1.y + r1.h >= r2.y) )
 end
 
 
--- Alias for Rect:collidesWith
+-- Alias for Rect:collidesWith except it is non-inclusive
 function Rect:intersects(r2)
 	return
-	  ( ((self.x >= r2.x) and (self.x >= r2.x)) or (self.x + self.w >= r2.x) )
+	  ( ((self.x > r2.x) and (self.x < r2.x + r2.w)) or ((self.x < r2.x) and self.x + self.w > r2.x) )
 	  and
-	  ( ((self.y >= r2.y) and (self.y <= r2.y + r2.h)) or (self.y + self.h >= r2.y) )
+	  ( ((self.y > r2.y) and (self.y < r2.y + r2.h)) or ((self.y < r2.y) and self.y + self.h > r2.y) )
 end
 
 

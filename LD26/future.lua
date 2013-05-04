@@ -131,10 +131,10 @@ function Future:update(dt, player)
 ]]--
 
 	rect = self.map:getIntersection( player )
-
+	
 	if Rect.intersects(rect, Rect:create(p.x, p.y, 1, p.h)) then
-		print "Left collision"
 	end
+	
 	-- Check Left edge
 	if self.map:edgeCollidesWithTile(player.x, player.y, player.x, player.y+player.h)
 	  then
