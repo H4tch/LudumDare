@@ -3,7 +3,7 @@ require "util"
 require "player"
 require "scene"
 require "future"
-
+require "tiler"
 
 Game = inheritsFrom( Scene )
 
@@ -12,6 +12,7 @@ require "test"
 function Game:init()
 	Game.scene = {}
 	Game.scene["future"] = Future:create()
+	Game.scene["tiler"] = Tiler:create("assets/future/rock1.png")
 	Game.currentScene = "future"
 	Game.player = Game.scene[Game.currentScene].createPlayer()
 	Game.camera = Rect:create( 0, 0, window.w, window.h )
@@ -29,7 +30,7 @@ function Game.update(dt)
 	Game.camera:centerOver(Game.player)
 	Game.camera.x = Game.camera.x + (Game.camera.w / 5)
 	Game.camera.y = Game.camera.y - (Game.camera.h / 5)
-	Game.camera:keepWithin(Game.scene[Game.currentScene].map:getBounds())
+	Game.camera:keepWithin(Game.scene[Game.currentScene]:getBounds())
 	--Game.camera:centerOver(Game.scene[Game.currentScene]:getPlayer())
 	
 	Game.scene[Game.currentScene]:update(dt, Game.player)
@@ -59,6 +60,12 @@ end
 function Game:onKeyDown(key, isRepeat)
 	if key == "escape" then
 		if Game.currentScene == "future" then
+		end
+	elseif key == "f1" then
+		if Game.currentScene ~= "tiler" then
+			Game.currentScene = "tiler"
+		else
+			Game.currentScene = "future"
 		end
 	end
 	Game.scene[Game.currentScene]:onKeyDown(key, isRepeat)

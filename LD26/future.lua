@@ -224,6 +224,9 @@ function Future:drawClouds(camera)
 	end
 end
 
+function Future:getBounds()
+	return self.map:getBounds()
+end
 
 function Future:moveTo(x,y)
 end
