@@ -41,7 +41,7 @@ function FutureMap:load()
 		,[2]=I("ground2.png")
 		,[3]=I("rock1.png")
 	}
-	map.tileSize = 64
+	map.tileSize = 128
 	map.tileRes = 8
 	map.scale = 1
 	
@@ -172,29 +172,81 @@ function FutureMap:getCellFromPixel(x,y)
 	return math.floor(x / self.tileSize), math.floor(y / self.tileSize)
 end
 
+-- TODO redo this function so it returns
+--
 -- Get the intersection of a rect with the collidible tiles in the map. 
 -- If there is no intersection, it returns Rect(0,0,0,0)
 function FutureMap:getIntersection(rect)
 	local box = self:tilesCollidingWithRect( rect )
 	
 	local x,y
-	-- Holds the bounds in which the player collides the map.
+	-- Holds the intersection of the side collisions.
+	local r1 = Rect:create(0,0,0,0)
+	-- Holds the intersection of the top and bottom collisions.
 	local r2 = Rect:create(0,0,0,0)
+	
 	for c=box.x,box.w do
+			
 		for r=box.y,box.h do
 			-- If it is a SOLID block.
 			if self:getBlockType(c, r) ~= 0 then
 				-- Get the players intersection with it.
 				tempRect = Rect.intersection(rect, self:getCellBox(c,r))
 				
-				--r2 = tempRect
-				-- Now combine this with all other intersections.
-				r2 = Rect.combine( r2, tempRect )
+				
+				--For each row in this column if the rect intersects a solid tile
+				--if the intersection equals the width of the rect
+				--or the rect also intersects the column,row+1
+				--then it is a side collision
+				
+				--REDO
+				--For each row in this column, it the rect intersects a solid tile
+				--if the intersection's left or right side matches the combined rect's
+				--or the height is the same then combine the rects <-- move this to the end of the column's intersection
+				-- so if this returns a rect that equals the player's rect, that
+				-- means he collides on both sides, and should *probably* be pushed up.
+				--Now when the next column is tested and there is an intersection
+				-- the combined rect won't be added to the first combined
+				--intersection unless it matches the height
+				
+				--Then do the same for but row-major for the top/bottom.
+				
+				-- Check collision of rect's left and right sides with
+				-- map's tiles.
+				if rect.w < rect.h
+				--if ( rect.y == tempRect.y and
+				--	rect.y + rect.h == tempRect.y + tempRect.h )
+				then
+					r1 = Rect.combine( r1, tempRect )
+				end
+				-- Check collision of rect's top and bottom sides with
+				-- map's tiles.
+				if rect.w > rect.h
+				--if ( rect.x == tempRect.x and
+				--	rect.x + rect.w == tempRect.x + tempRect.w )
+				then
+					r2 = Rect.combine( r2, tempRect )
+				end
+				
+				-- TODO handle cases of partial intersection
+				
+				-- Use for debugging the case the rect collides with
+				-- the entire top/bottom and entire side
+				if ( rect.y == tempRect.y and
+					rect.y + rect.h == tempRect.y + tempRect.h )
+					and  ( rect.x == tempRect.x and
+					rect.x + rect.w == tempRect.x + tempRect.w )
+				then
+					print "Unhandled collision, player is completely within tile"
+				end
 			end
 		end
 	end
-	return r2
+	return r1,r2
 end
+
+
+
 
 function FutureMap:getAlignedPixel(x,y)
 	return self:getCellCoordinate( FutureMap.getCellFromPixel(self,x,y) )

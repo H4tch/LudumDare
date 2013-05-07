@@ -69,18 +69,20 @@ function Future:update(dt, player)
 	
 	self.map:update(dt)
 
-	local p = player
+	--local p = player
+	local p = Rect:create(player.x, player.y, player.w, player.h)
+	--local originalPlayer = Rect:create(p.x, p.y, p.w, p.h)
 	local x = 0
 	local y = 0
 	
 	rect = self.map:getIntersection( player )
---[[
+	
 	-- Check Left edge.
 	if Rect.collidesWith(rect, Rect:create(p.x, p.y, 2, p.h)) then
 		if math.floor(rect.w) == math.floor(p.w) then
 		elseif rect.w < rect.h then
 			print "left collided with wall"
-			p.vel.x = 0
+			player.vel.x = 0
 			x,_ = self.map:getAlignedPixel( p.x, p.y)
 			player.x = x + self.map.tileSize
 		end
@@ -89,24 +91,25 @@ function Future:update(dt, player)
 		--if math.floor(rect.x+rect.w) == math.floor(p.x+p.w) then
 		if rect.w < rect.h then
 			print "right collided with wall"
-			p.vel.x = 0
+			player.vel.x = 0
 			x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
-			p.x = x - p.w
+			player.x = x - p.w
 		end
 	end
 	
 	-- Check Top edge.
 	if Rect.collidesWith(rect, Rect:create(p.x, p.y, p.w, 2)) then
-		if math.floor(rect.y + rect.h) == math.floor(p.y + p.h) then
-		elseif rect.w > rect.h then
+		--print "potential TOP"
+		--if math.floor(rect.y + rect.h) == math.floor(p.y + p.h) then
+		if rect.w > rect.h then
 			print "top collided with ceiling"
-			p.vel.y = 0
-			p.jumpVel = 0
-			p.state.isJumping = false
+			player.vel.y = 0
+			player.jumpVel = 0
+			player.state.isJumping = false
 			_,y = self.map:getAlignedPixel( p.x, p.y)
-			p.y = y + self.map.tileSize
+			player.y = y + self.map.tileSize
 		end
---]]
+	end--]]
 	-- Check Bottom edge.
 --[[	elseif self.map:edgeCollidesWithTile(player.x, player.y+player.h+1, player.x+player.w, player.y+player.h+1) then
 		player.vel.y = 0
@@ -121,28 +124,31 @@ function Future:update(dt, player)
 		player.state.inJumping = true
 	end	
 --]]
---[[
+
 	-- Check Bottom edge.
-	elseif Rect.collidesWith(rect, Rect:create(p.x, p.y+p.h, p.w, 2)) then
+	if Rect.collidesWith(rect, Rect:create(p.x, p.y+p.h-1, p.w, 2)) then
+		print "potential collision"
 	--elseif self.map:edgeCollidesWithTile(player.x, player.y+player.h+1, player.x+player.w, player.y+player.h+1) then
-		if math.floor(rect.y) == math.floor(p.y) then
-		elseif rect.w > rect.h then
+		--if math.floor(rect.h) == math.floor(p.h) then
+		if rect.w > rect.h then
+			print "collided with floor."
 			player.vel.y = 0
 			_,y = self.map:getAlignedPixel( p.x, p.y + p.h)
-			p.y = y - p.h
-			p.state.inAir = false
-			p.jumpVel = 0
-			p.state.isJumping = false
+			player.y = y - p.h
+			player.state.inAir = false
+			player.jumpVel = 0
+			player.state.isJumping = false
 		--else
 		end
 	else 
-		p.state.inAir = true
+		player.state.inAir = true
 		-- This would prevent 'double jumping'
 		player.state.isJumping = true
 	end
 --]]
 
 
+--[[
 	-- Check for side collision.
 	if rect.h == p.h and rect.w < rect.h then
 		if rect.w == p.w then

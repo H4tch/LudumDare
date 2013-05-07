@@ -49,11 +49,11 @@ function Game:draw()
 	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(200,480,500,600))
 	love.graphics.setColor(255,255,255,255)
 	
-	--local p = Game.player
+	local p = Game.player
 	--Rect.print(p)
 	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x-5,p.y-5,p.w+10,p.h+10))
-	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x,p.y,p.w,p.h))
-	--love.graphics.rectangle("fill", r2.x-Game.camera.x, r2.y-Game.camera.y, r2.w, r2.h)	
+	local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x,p.y,p.w,p.h))
+	love.graphics.rectangle("fill", r2.x-Game.camera.x, r2.y-Game.camera.y, r2.w, r2.h)	
 end
 
 
