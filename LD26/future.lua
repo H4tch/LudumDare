@@ -147,11 +147,14 @@ function Future:update(dt, player)
 		player.jumpVel = 0
 		player.state.isJumping = false
 	else
-		if (self.map:getBlockType(self.map:getCellFromPixel(p.x,p.y+p.h+2)) == 0
-		  and self.map:getBlockType(self.map:getCellFromPixel(p.x+p.w-1.5,p.y+p.h+2)) == 0)
+		-- In no blocks under player, make him fall.
+		if (self.map:getBlockType(self.map:getCellFromPixel(p.x+2, p.y+p.h+2)) == 0
+		  and self.map:getBlockType(self.map:getCellFromPixel(p.x+p.w-4, p.y+p.h+2)) == 0)
 		then
+		-- TODO? Check if corners collide with tile, if so, make him
+		-- fall ~3.5 pixels so there is no bottom collision.
 		player.state.inAir = true
-		-- This would prevent double jumping
+		-- Prevent double jumping.
 		player.state.isJumping = true
 		end
 	end
