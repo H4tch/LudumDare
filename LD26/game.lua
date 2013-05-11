@@ -14,7 +14,7 @@ function Game:init()
 	Game.scene["future"] = Future:create()
 	Game.scene["tiler"] = Tiler:create("assets/future/rock1.png")
 	Game.currentScene = "future"
-	Game.player = Game.scene[Game.currentScene].createPlayer()
+	Game.player = Game.scene[Game.currentScene]:createPlayer()
 	Game.camera = Rect:create( 0, 0, window.w, window.h )
 	
 	--print("Map tileSize: "..Game.scene[Game.currentScene].map.tileSize)
@@ -42,6 +42,7 @@ end
 
 function Game:draw()
 	Game.scene[Game.currentScene]:draw(Game.camera)
+	--love.graphics.rectangle("fill",Game.scene[Game.currentScene].map:getCellRangeBox(2,7,3,9):offset(Game.camera):print():values())
 	--Test.rect()
 	Game.player:draw(Game.camera)
 	--drawHud()
@@ -51,9 +52,11 @@ function Game:draw()
 	
 	local p = Game.player
 	--Rect.print(p)
-	--local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x-5,p.y-5,p.w+10,p.h+10))
-	local r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x,p.y,p.w,p.h))
-	love.graphics.rectangle("fill", r2.x-Game.camera.x, r2.y-Game.camera.y, r2.w, r2.h)	
+	local r1,r2 = Game.scene[Game.currentScene].map:getIntersection(Rect:create(p.x-1,p.y-1,p.w+2,p.h+2))
+	love.graphics.setColor(20,20,130,255)
+	love.graphics.rectangle("fill", r1.x-Game.camera.x-2, r1.y-Game.camera.y-2, r1.w+4, r1.h+4)
+	love.graphics.setColor(130,20,20,255)
+	love.graphics.rectangle("fill", r2.x-Game.camera.x-2, r2.y-Game.camera.y-2, r2.w+4, r2.h+4)	
 end
 
 

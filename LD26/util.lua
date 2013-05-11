@@ -29,11 +29,17 @@ end
 function Rect:print()
 	print("("..(self.x or "nil")..","..(self.y or "nil")..
 		 ")["..(self.w or "nil").."x"..(self.h or "nil").."]")
+	return self
 end
 
 -- Returns X,Y,W,H
 function Rect:values()
 	return self.x, self.y, self.w, self.h
+end
+
+-- Get the area, WxH
+function Rect:area()
+	return self.w * self.h
 end
 
 -- Offsets a rect's position  by another rects position
@@ -113,11 +119,11 @@ end
 -- Checks if Two Rects intersect.
 function Rect.intersects(r1, r2)
 	return
-	  ( ((r1.x >= r2.x) and (r1.x <= r2.x + r2.w))
-			or ((r1.x < r2.x) and r1.x + r1.w >= r2.x) )
+	  ( ((r1.x > r2.x) and (r1.x < r2.x + r2.w))
+			or ((r1.x < r2.x) and r1.x + r1.w > r2.x) )
 	  and
-	  ( ((r1.y >= r2.y) and (r1.y <= r2.y + r2.h))
-			or ((r1.y < r2.y) and r1.y + r1.h >= r2.y) )
+	  ( ((r1.y > r2.y) and (r1.y < r2.y + r2.h))
+			or ((r1.y < r2.y) and r1.y + r1.h > r2.y) )
 end
 
 -- Deprecated

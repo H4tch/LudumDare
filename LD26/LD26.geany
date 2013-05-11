@@ -23,20 +23,19 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=2
-FILE_NAME_0=139;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fmain.lua;0;4
-FILE_NAME_1=2818;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Futil.lua;0;4
-FILE_NAME_2=855;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ftiler.lua;0;4
-FILE_NAME_3=1014;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fgame.lua;0;4
-FILE_NAME_4=5545;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ffuture.lua;0;4
-FILE_NAME_5=1750;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ffuture_map.lua;0;4
-FILE_NAME_6=2144;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fplayer.lua;0;4
-FILE_NAME_7=194;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fintro.lua;0;4
+current_page=5
+FILE_NAME_0=1132;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ftest.lua;0;4
+FILE_NAME_1=277;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fmain.lua;0;4
+FILE_NAME_2=227;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Futil.lua;0;4
+FILE_NAME_3=1315;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fgame.lua;0;4
+FILE_NAME_4=2723;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ffuture.lua;0;4
+FILE_NAME_5=6708;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Ffuture_map.lua;0;4
+FILE_NAME_6=2337;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fplayer.lua;0;4
+FILE_NAME_7=199;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fintro.lua;0;4
 FILE_NAME_8=0;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fobject.lua;0;4
 FILE_NAME_9=122;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fscene.lua;0;4
 FILE_NAME_10=1871;None;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fassets%2Ffuture%2Fmap.dat;0;4
 FILE_NAME_11=1748;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FGames%2FLove%2FZombies%3A%20The%20Game%20of%20Life%2Fgrid.lua;0;4
-FILE_NAME_12=0;Lua;0;16;1;1;0;%2Fhome%2Fdan%2FProjects%2F1GAM%2FLD26%2Fcontent.lua;0;4
 
 [VTE]
 last_dir=/home/dan/Projects/My_engine_test

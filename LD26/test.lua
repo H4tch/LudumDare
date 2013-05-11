@@ -23,6 +23,17 @@ function Test.rect()
 	love.graphics.setColor(0,255,0,255)
 	love.graphics.rectangle("fill", r2:values())
 	
+	-- Rect combination test 2
+	r1 = Rect:create(10,10,5.0400001,1.543)
+	r2 = Rect:create(14,14,32,21.54)
+	love.graphics.setColor(0,0,255,255)
+	r3 = Rect.combine(r1,r2)
+	love.graphics.rectangle("fill", r3.x-2,r3.y-2,r3.w+4,r3.h+4)
+	love.graphics.setColor(255,0,0,255)
+	love.graphics.rectangle("fill", r1:values())
+	love.graphics.setColor(0,255,0,255)
+	love.graphics.rectangle("fill", r2:values())
+	
 	-- Intersects test
 	r1 = Rect:create(512,64,20,64)
 	r2 = Rect:create(480,68,2,10)

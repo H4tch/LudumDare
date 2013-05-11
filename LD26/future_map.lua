@@ -41,7 +41,7 @@ function FutureMap:load()
 		,[2]=I("ground2.png")
 		,[3]=I("rock1.png")
 	}
-	map.tileSize = 128
+	map.tileSize = 32
 	map.tileRes = 8
 	map.scale = 1
 	
@@ -141,15 +141,15 @@ function FutureMap:getBlockType(col, row)
 	if self[row] then
 		block = self[row][col]
 	end
-	return (block or 0)
+	return (block or 1) -- Out of bounds counts as SOLID block.
 end
 
 
 function FutureMap:getTileFromPixel(x,y)
 	local col = math.floor(x / self.tileSize)
 	local row = math.floor(y / self.tileSize)
-	if col < 1 then col = 1 end
-	if row < 1 then row = 1 end
+	--if col < 0 then col = 0 end
+	--if row < 0 then row = 0 end
 	return self:getBlockType(col,row)
 end
 
@@ -161,95 +161,154 @@ end
 function FutureMap:getCellCoordinate(col,row)
 	return (col * self.tileSize),(row * self.tileSize)
 end
+-- Get X,Y of a cell(C,R).
+function FutureMap:getCellCoordinates(col,row)
+	return (col * self.tileSize),(row * self.tileSize)
+end
 
 -- Get a rect of a cell(C,R)
 function FutureMap:getCellBox(col,row)
 	return Rect:create((col * self.tileSize), (row * self.tileSize), self.tileSize)
 end
 
--- Get the cell(C,R) of an X,Y pixel.
-function FutureMap:getCellFromPixel(x,y)
-	return math.floor(x / self.tileSize), math.floor(y / self.tileSize)
+-- Get a rect of a range of cells(C1,R1,C2,R2), inclusive
+function FutureMap:getCellRangeBox( c1, r1, c2, r2 )
+	local x,y
+	local r = Rect:create(0,0,0,0)
+	x,y = self:getCellCoordinates(c1, r1)
+	r.x = x
+	r.y = y
+	r.w = (c2 - c1 + 1) * self.tileSize
+	r.h = (r2 - r1 + 1) * self.tileSize
+	return r
 end
 
--- TODO redo this function so it returns
---
--- Get the intersection of a rect with the collidible tiles in the map. 
--- If there is no intersection, it returns Rect(0,0,0,0)
+-- Get the cell(C,R) of an X,Y pixel.
+function FutureMap:getCellFromPixel(x,y)
+	-- Changed to ceil() - 1 instead of floor() so
+	return math.ceil(x / self.tileSize)-1, math.ceil(y / self.tileSize)-1
+end
+
+function FutureMap:getAlignedPixel(x,y)
+	return self:getCellCoordinates( FutureMap.getCellFromPixel(self,x,y) )
+end
+
+
+-- Get the intersection of a rect with the collidible tiles in the map.
 function FutureMap:getIntersection(rect)
+	-- Used to iterate over a slice of the map tiles.
 	local box = self:tilesCollidingWithRect( rect )
 	
-	local x,y
-	-- Holds the intersection of the side collisions.
+	-- Holds the final result of the side collisions.
+	local hRect = Rect:create(0,0,0,0)
+	
+	-- Holds the final result of the top/bottom collisions.
+	local vRect = Rect:create(0,0,0,0)
+	
+	-- Holds the intersection of the rect with the current column or row.
 	local r1 = Rect:create(0,0,0,0)
-	-- Holds the intersection of the top and bottom collisions.
-	local r2 = Rect:create(0,0,0,0)
+	
+	-- Holds the rect of a cell
+	local cellRect = Rect:create(0,0,0,0)
+	
+	-- Holds the minimun and maximun cell in the row/column that is
+	--collidible.
+	local minC
+	-- Holds the maximun cell in the row/column that is solid.
+	local maxC
+	-- Experimental value that holds which row/column was intersected with last.
+	local prevC
+	
+	-- Suggestions to handle a double collision (e.g. both sides collide)
+	-- Contains either "left", "right", "up", or "down.
+	local hPlacement
+	local vPlacement
 	
 	for c=box.x,box.w do
-			
+		-- Reset bounds for each column.
+		minC = nil
+		maxC = nil
 		for r=box.y,box.h do
-			-- If it is a SOLID block.
+			-- For each SOLID block in this column, get the upper and lower
+			-- bounds of the row.
 			if self:getBlockType(c, r) ~= 0 then
-				-- Get the players intersection with it.
-				tempRect = Rect.intersection(rect, self:getCellBox(c,r))
+				if not minC then minC = r
+				elseif r < minC then minC = r end
 				
-				
-				--For each row in this column if the rect intersects a solid tile
-				--if the intersection equals the width of the rect
-				--or the rect also intersects the column,row+1
-				--then it is a side collision
-				
-				--REDO
-				--For each row in this column, it the rect intersects a solid tile
-				--if the intersection's left or right side matches the combined rect's
-				--or the height is the same then combine the rects <-- move this to the end of the column's intersection
-				-- so if this returns a rect that equals the player's rect, that
-				-- means he collides on both sides, and should *probably* be pushed up.
-				--Now when the next column is tested and there is an intersection
-				-- the combined rect won't be added to the first combined
-				--intersection unless it matches the height
-				
-				--Then do the same for but row-major for the top/bottom.
-				
-				-- Check collision of rect's left and right sides with
-				-- map's tiles.
-				if rect.w < rect.h
-				--if ( rect.y == tempRect.y and
-				--	rect.y + rect.h == tempRect.y + tempRect.h )
-				then
-					r1 = Rect.combine( r1, tempRect )
+				if not maxC then maxC = r
+				elseif r > maxC then maxC = r end
+			end
+		end
+		if minC then
+			-- Now get the intersection the rect has to the column.
+			r1 = Rect.intersection(rect, self:getCellRangeBox(c,minC,c,maxC))
+			-- It's a side collision of the intersection is taller than wide.
+			if r1.w < r1.h and (r1.w > 3 or r1.h > 3) then
+				-- Check collision with two columns.
+				if not prevC then prevC = c else 
+					-- Suggest moving to the smaller intersection result.
+					local a1, a2
+					a1 = (hRect.w + r1.w) * (hRect.h)
+					a2 = (r1.w + hRect.w) * (r1.h)
+					if a1 > a2 then
+						hPlacement = "right"
+					elseif a1 == a2 then
+					else hPlacement = "left"
+					end
+					print("double side collision "..prevC.." "..c)
+					print(hPlacement)
+					r1:print()
 				end
-				-- Check collision of rect's top and bottom sides with
-				-- map's tiles.
-				if rect.w > rect.h
-				--if ( rect.x == tempRect.x and
-				--	rect.x + rect.w == tempRect.x + tempRect.w )
+				if (hRect.w == 0 and hRect.h == 0)
+				  or (hRect.y == r1.y or hRect.y + hRect.h == r1.y + r1.h)
 				then
-					r2 = Rect.combine( r2, tempRect )
-				end
-				
-				-- TODO handle cases of partial intersection
-				
-				-- Use for debugging the case the rect collides with
-				-- the entire top/bottom and entire side
-				if ( rect.y == tempRect.y and
-					rect.y + rect.h == tempRect.y + tempRect.h )
-					and  ( rect.x == tempRect.x and
-					rect.x + rect.w == tempRect.x + tempRect.w )
-				then
-					print "Unhandled collision, player is completely within tile"
+					hRect = Rect.combine(hRect, r1)
 				end
 			end
 		end
 	end
-	return r1,r2
-end
-
-
-
-
-function FutureMap:getAlignedPixel(x,y)
-	return self:getCellCoordinate( FutureMap.getCellFromPixel(self,x,y) )
+	
+	for r=box.y,box.h do
+		-- Reset bounds for each row.
+		minC = nil
+		maxC = nil
+		for c=box.x,box.w do
+			-- For each SOLID block in this row, get the upper and lower
+			-- bounds of the column.
+			if self:getBlockType(c, r) ~= 0 then
+				if not minC then minC = c
+				elseif c < minC then minC = c end
+				
+				if not maxC then maxC = c
+				elseif c > maxC then maxC = c end
+			end
+		end
+		if minC then
+			-- Now get the intersection the rect has to the row.
+			r1 = Rect.intersection(rect, self:getCellRangeBox(minC,r,maxC,r))
+			-- It's a top/bottom collision of the intersection is wider than tall
+			if r1.w > r1.h and (r1.w > 3 or r1.h > 3) then
+				-- Check collision with two rows.
+				if not prevC then prevC = c else
+					-- Suggest moving to the smaller intersection result.
+					local a1, a2
+					a1 = (vRect.h + r1.h) * (vRect.w)
+					a2 = (r1.h + vRect.h) * (r1.w)
+					if a1 > a2 then
+						vPlacement = "down"
+					elseif a1 == a2 then
+					else vPlacement = "up"
+					end
+				end
+				if (vRect.w == 0 and vRect.h == 0)
+				  or (vRect.x == r1.x or vRect.x + vRect.w == r1.x + r1.w)
+				then
+					vRect = Rect.combine(vRect, r1)
+				end
+			end
+		end
+	end
+	return hRect,vRect,hPlacement,vPlacement
 end
 
 
@@ -266,14 +325,14 @@ function FutureMap:draw(camera)
 			if tile ~= nil then
 				love.graphics.setColor(255,255,255,255)
 				love.graphics.draw( tile, b.x-camera.x, b.y-camera.y, 0, self.scale)
-				--if index ~= 0 then
-				--	love.graphics.print( c.."."..r, b.x-camera.x, b.y-camera.y, 0, .75, .75, 0, -self.tileSize/2)
-				--end
 			else
 				-- Draw the frame of an unknown block and print its number id.
 				love.graphics.setColor(0,0,0,255)
 				love.graphics.rectangle( "line", b.x-camera.x, b.y-camera.y, self.tileSize, self.tileSize, 0, 1, 1)
 				love.graphics.print( (index or ""), b.x-camera.x, b.y-camera.y, 0, 1)
+			end
+			if index ~= 0 then
+				love.graphics.print( c.."."..r, b.x-camera.x, b.y-camera.y, 0, .75, .75, 0, -self.tileSize/2)
 			end
 		end
 	end
@@ -282,6 +341,7 @@ end
 
 
 function FutureMap:drawGrid(camera)
+	-- Default line drawing is "smooth" which is too slow.
 	love.graphics.setLine(1, "rough")
 	local p
 	for r=1,self.rows do

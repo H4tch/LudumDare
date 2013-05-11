@@ -8,7 +8,7 @@ function Future:create()
 --	local future = Scene:create()
 	local future = {}
 	setmetatable(future, Future_mt)
-	future.background = love.graphics.newImage("assets/sunset2.png")
+	future.background = love.graphics.newImage("assets/sunset.png")
 	
 	--width = 2000
 	
@@ -50,8 +50,9 @@ function Future:create()
 	return future
 end
 
-function Future.createPlayer()
-	return Player:create("assets/future/player.png", 64, 416)
+function Future:createPlayer()
+	local x,y = self.map:getCellCoordinate(2,8)
+	return Player:create("assets/future/player.png", x, y)
 end
 
 function Future:nextScene()
@@ -71,129 +72,89 @@ function Future:update(dt, player)
 
 	--local p = player
 	local p = Rect:create(player.x, player.y, player.w, player.h)
-	--local originalPlayer = Rect:create(p.x, p.y, p.w, p.h)
 	local x = 0
 	local y = 0
 	
-	rect = self.map:getIntersection( player )
+	local hRect = Rect:create(0,0,0,0)
+	local vRect = Rect:create(0,0,0,0)
 	
-	-- Check Left edge.
-	if Rect.collidesWith(rect, Rect:create(p.x, p.y, 2, p.h)) then
-		if math.floor(rect.w) == math.floor(p.w) then
-		elseif rect.w < rect.h then
-			print "left collided with wall"
+	-- Holds a string("left","right","up","down" to suggest a new placement
+	-- for if both sides collide, or top and bottom collide.)
+	local hPlacement, vPlacement
+	
+	hRect,vRect,hPlacement,vPlacement = self.map:getIntersection( p )
+	
+	-- If a small portion of the bottom or top intersects
+	if (hRect.h < 15 and p.h >= 15)
+	  and ( ((p.y < hRect.y) and (p.y + p.h == hRect.y + hRect.h)) --bottom
+	    or  ((p.y == hRect.y) and (p.y + p.h > hRect.y + hRect.h)) ) --top
+	then
+	--else
+	-- If Left edge.
+	elseif hRect.x == p.x then
+		-- and If Right edge.
+		if hRect.w == p.w then
+			-- Do nothing for now for left and right collision.
+			print "LR|--------|"
+			if hPlacement then print("need to move "..hPlacement) end
+		else
+			print "L |----"
+			hRect:print()
 			player.vel.x = 0
 			x,_ = self.map:getAlignedPixel( p.x, p.y)
+			print ("before "..p.x)
 			player.x = x + self.map.tileSize
+			print ("after "..player.x)
+			--player.x = player.lastPos.x
 		end
-	-- Check Right edge.
-	elseif Rect.collidesWith(rect, Rect:create(p.x+p.w-1, p.y, 3, p.h)) then
-		--if math.floor(rect.x+rect.w) == math.floor(p.x+p.w) then
-		if rect.w < rect.h then
-			print "right collided with wall"
-			player.vel.x = 0
-			x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
-			player.x = x - p.w
-		end
+	--end
+	-- If Right edge.
+	elseif hRect.x + hRect.w == p.x + p.w then
+		print "R      ----|"
+		player.vel.x = 0
+		x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
+		print ("before "..player.x)
+		player.x = x - p.w
+		print ("after "..player.x)
+		--player.x = player.lastPos.x
 	end
 	
-	-- Check Top edge.
-	if Rect.collidesWith(rect, Rect:create(p.x, p.y, p.w, 2)) then
-		--print "potential TOP"
-		--if math.floor(rect.y + rect.h) == math.floor(p.y + p.h) then
-		if rect.w > rect.h then
-			print "top collided with ceiling"
+	-- If Top edge.
+	if vRect.y == p.y then
+		-- And if bottom edge.
+		if vRect.h == p.h then
+			-- Do nothing for now.
+			print "TB========"
+			print("need to move "..vPlacement)
+		else
+			print "T `````"
 			player.vel.y = 0
 			player.jumpVel = 0
 			player.state.isJumping = false
 			_,y = self.map:getAlignedPixel( p.x, p.y)
 			player.y = y + self.map.tileSize
+			--player.y = player.lastPos.y
 		end
-	end--]]
-	-- Check Bottom edge.
---[[	elseif self.map:edgeCollidesWithTile(player.x, player.y+player.h+1, player.x+player.w, player.y+player.h+1) then
+		
+	-- If Bottom edge.
+	elseif vRect.y + vRect.h == p.y + p.h then
+		print "B _____"
 		player.vel.y = 0
 		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
 		player.y = y - player.h
+		--player.y = player.lastPos.y
 		player.state.inAir = false
 		player.jumpVel = 0
 		player.state.isJumping = false
 	else
+		if (self.map:getBlockType(self.map:getCellFromPixel(p.x,p.y+p.h+2)) == 0
+		  and self.map:getBlockType(self.map:getCellFromPixel(p.x+p.w-1.5,p.y+p.h+2)) == 0)
+		then
 		player.state.inAir = true
-		-- This would prevent 'double jumping'
-		player.state.inJumping = true
-	end	
---]]
-
-	-- Check Bottom edge.
-	if Rect.collidesWith(rect, Rect:create(p.x, p.y+p.h-1, p.w, 2)) then
-		print "potential collision"
-	--elseif self.map:edgeCollidesWithTile(player.x, player.y+player.h+1, player.x+player.w, player.y+player.h+1) then
-		--if math.floor(rect.h) == math.floor(p.h) then
-		if rect.w > rect.h then
-			print "collided with floor."
-			player.vel.y = 0
-			_,y = self.map:getAlignedPixel( p.x, p.y + p.h)
-			player.y = y - p.h
-			player.state.inAir = false
-			player.jumpVel = 0
-			player.state.isJumping = false
-		--else
-		end
-	else 
-		player.state.inAir = true
-		-- This would prevent 'double jumping'
+		-- This would prevent double jumping
 		player.state.isJumping = true
-	end
---]]
-
-
---[[
-	-- Check for side collision.
-	if rect.h == p.h and rect.w < rect.h then
-		if rect.w == p.w then
-		-- Left edge.
-		elseif rect.x == p.x then
-			print "left collided with wall"
-			p.vel.x = 0
-			x,_ = self.map:getAlignedPixel( p.x, p.y)
-			player.x = x + self.map.tileSize
-		
-		-- Right edge.
-		elseif rect.x + rect.w == p.x + p.w then
-			print "right collided with wall"
-			p.vel.x = 0
-			x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
-			p.x = x - p.w + .1
 		end
 	end
-	
-	-- rect = self.map:getBottomIntersection()
-	-- rect = self.map:getColumnIntersection()
-	
-	-- Check top and bottom collisions.
-	if rect.w == p.w or rect.w >= rect.h then
-		-- Top edge.
-		if rect.y == p.y then
-			print "top collided with ceiling"
-			p.vel.y = 0
-			p.jumpVel = 0
-			p.state.isJumping = false
-			_,y = self.map:getAlignedPixel( p.x, p.y)
-			p.y = y + self.map.tileSize
-		
-		-- Bottom edge.
-		elseif rect.y + rect.h == p.y + p.h then
-			print "bottom collided with floor"
-			p.vel.y = 0
-			_,y = self.map:getAlignedPixel( p.x, p.y + p.h)
-			p.y = y - p.h
-			--p.state.inAir = false
-			p.jumpVel = 0
-			p.state.isJumping = false
-		end
-	end
---]]
 end
 
 
@@ -217,7 +178,6 @@ function Future:draw(camera)
 	love.graphics.setColor(0,0,0,255)
 	self:drawClouds(camera)
 	self.map:draw(camera)
-	--self.map:getIntersection( Rect:create(100,450,100,150) ):print()
 end
 
 

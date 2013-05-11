@@ -28,6 +28,7 @@ function Player:create(sprite, x, y)
 	p.jumpVel = 0
 	p.x = x or 0
 	p.y = y or 0
+	p.lastPos = Vec:create(p.x, p.y)
 	p.scale = scale,1
 	p.rot = rot
 	p.acc = Vec:create(0,0)
@@ -162,6 +163,8 @@ function Player:update(dt)
 	end
 	
 	--print("Velocity "..self.vel.x.." "..self.vel.y)
+	self.lastPos.x = self.x
+	self.lastPos.y = self.y
 	-- Update position
 	self.x = self.x + (dt * self.vel.x)
 	self.y = self.y + (dt * self.vel.y)
