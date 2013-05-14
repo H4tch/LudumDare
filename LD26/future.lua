@@ -65,7 +65,8 @@ function Future:prevScene()
 end
 
 
-function Future:update(dt, player)
+function Future:update(dt, player, debug)
+	local s = ""
 	self:updateClouds(dt)
 	
 	self.map:update(dt)
@@ -95,27 +96,31 @@ function Future:update(dt, player)
 		-- and If Right edge.
 		if hRect.w == p.w then
 			-- Do nothing for now for left and right collision.
-			print "LR|--------|"
-			if hPlacement then print("need to move "..hPlacement) end
+			s = s.."LR|--------|".."\n"
+			if hPlacement then s = s.."need to move "..hPlacement.."\n" end
 		else
-			print "L |----"
-			hRect:print()
+			player.state["collidesLeft"] = true
+			player.state["collidesRight"] = false
+			s = s.."L |----".."\n"
+			s = s..hRect:str()
 			player.vel.x = 0
 			x,_ = self.map:getAlignedPixel( p.x, p.y)
-			print ("before "..p.x)
+			s = s.."before "..p.x
 			player.x = x + self.map.tileSize
-			print ("after "..player.x)
+			s = s.."after "..player.x
 			--player.x = player.lastPos.x
 		end
 	--end
 	-- If Right edge.
 	elseif hRect.x + hRect.w == p.x + p.w then
-		print "R      ----|"
+		player.state["collidesRight"] = true
+		player.state["collidesLeft"] = false
+		s = s.."R      ----|"
 		player.vel.x = 0
 		x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
-		print ("before "..player.x)
+		s = s.."before "..player.x.."\n"
 		player.x = x - p.w
-		print ("after "..player.x)
+		s = s.."after "..player.x.."\n"
 		--player.x = player.lastPos.x
 	end
 	
@@ -124,10 +129,12 @@ function Future:update(dt, player)
 		-- And if bottom edge.
 		if vRect.h == p.h then
 			-- Do nothing for now.
-			print "TB========"
-			print("need to move "..vPlacement)
+			s = s.."TB========".."\n"
+			s = s.."need to move "..vPlacement.."\n"
 		else
-			print "T `````"
+			player.state["collidesTop"] = true
+			player.state["collidesBottom"] = false
+			s = s.."T `````".."\n"
 			player.vel.y = 0
 			player.jumpVel = 0
 			player.state.isJumping = false
@@ -138,7 +145,9 @@ function Future:update(dt, player)
 		
 	-- If Bottom edge.
 	elseif vRect.y + vRect.h == p.y + p.h then
-		print "B _____"
+		player.state["collidesbottom"] = true
+		player.state["collidesTop"] = false
+		s = s.."B _____".."\n"
 		player.vel.y = 0
 		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
 		player.y = y - player.h
@@ -146,18 +155,21 @@ function Future:update(dt, player)
 		player.state.inAir = false
 		player.jumpVel = 0
 		player.state.isJumping = false
-	else
+	end
 		-- In no blocks under player, make him fall.
-		if (self.map:getBlockType(self.map:getCellFromPixel(p.x+2, p.y+p.h+2)) == 0
-		  and self.map:getBlockType(self.map:getCellFromPixel(p.x+p.w-4, p.y+p.h+2)) == 0)
-		then
+	if (self.map:getBlockType(self.map:getCellFromPixel(p.x+.5, p.y+p.h+2)) == 0
+		  and self.map:getBlockType(self.map:getCellFromPixel(p.x+p.w-1, p.y+p.h+2)) == 0)
+	then
 		-- TODO? Check if corners collide with tile, if so, make him
 		-- fall ~3.5 pixels so there is no bottom collision.
 		player.state.inAir = true
 		-- Prevent double jumping.
 		player.state.isJumping = true
-		end
 	end
+	if debug then
+		print(s)
+	end
+	s = ""
 end
 
 
@@ -175,12 +187,12 @@ end
 
 
 
-function Future:draw(camera)
+function Future:draw(camera, debug)
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.draw(self.background,0,0,0,1,1)
 	love.graphics.setColor(0,0,0,255)
 	self:drawClouds(camera)
-	self.map:draw(camera)
+	self.map:draw(camera, debug)
 end
 
 

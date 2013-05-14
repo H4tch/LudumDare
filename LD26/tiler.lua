@@ -11,7 +11,9 @@ function Tiler:create( file )
 	local s = {}
 	setmetatable(s, Tiler_mt)
 	s.tileSize = 64
+	s.tileRes = 64
 	s.scale = 1
+	s.originalTile = Content:image(file)
 	s.tile = s:setImage(file)
 	s.cols = math.floor(window.w / s.tileSize)
 	s.rows = math.floor(window.h / s.tileSize)
@@ -24,15 +26,44 @@ function Tiler:setImage( file )
 	self.tile:setFilter("nearest","nearest")
 	-- Magnify
 	if self.tile:getWidth() ~= self.tileSize then
-		local scale = self.tileSize / self.tile:getWidth()
+		local wScale = self.tileSize / self.tile:getWidth()
+		local hScale = self.tileSize / self.tile:getHeight()
 		local newImage = love.graphics.newCanvas(self.tileSize, self.tileSize)
 		love.graphics.setCanvas(newImage)
-		love.graphics.draw(self.tile, 0, 0, 0, scale, scale)
+		love.graphics.draw(self.tile, 0, 0, 0, wScale, hScale)
 		self.tile = love.graphics.newImage(newImage:getImageData())
 	end
 	self.tile:setFilter("nearest","nearest")
 	return self.tile
 end
+
+
+--Todo, maybe use a Quad
+function Tiler:setTileResolution(res, filter)
+	print(res)
+	local scale = 0
+	local v = self.originalTile
+	local newImage
+	self.tileRes = res
+	
+	v:setFilter((filter or "nearest"),(filter or "nearest"))
+	-- Minify
+	if v:getWidth() ~= self.tileRes then
+		scale = self.tileRes / v:getWidth()
+		newImage = love.graphics.newCanvas(self.tileRes, self.tileRes)
+		love.graphics.setCanvas(newImage)
+		love.graphics.draw(v, 0, 0, 0, scale, scale)
+		self.originalTile = love.graphics.newImage(newImage:getImageData())
+	end
+	
+	self.originalTile:setFilter((filter or "nearest"),(filter or "nearest"))
+	-- Magnify
+	scale = self.tileSize / v:getWidth()
+	newImage = love.graphics.newCanvas(self.tileSize, self.tileSize)
+	love.graphics.setCanvas(newImage)
+	love.graphics.draw(v, 0, 0, 0, scale, scale)
+end
+
 
 function Tiler:setTileSize(size)
 	if size <= 0 then return end
@@ -72,6 +103,11 @@ function Tiler:onKeyDown(key, isRepeat)
 		self:setTileSize(self.tileSize+16)
 	elseif key == "down" then
 		self:setTileSize(self.tileSize-16)
+	end
+	if key == "left" then
+		self:setTileResolution(self.tileRes-32)
+	elseif key == "right" then
+		self:setTileResolution(self.tileRes+32)
 	end
 end
 

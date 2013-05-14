@@ -32,10 +32,16 @@ function Rect:print()
 	return self
 end
 
+function Rect:str()
+	return "("..(self.x or "nill")..","..(self.y or "nil")..
+		 ")["..(self.w or "nil").."x"..(self.h or "nil").."]"
+end
+
 -- Returns X,Y,W,H
 function Rect:values()
 	return self.x, self.y, self.w, self.h
 end
+
 
 -- Get the area, WxH
 function Rect:area()

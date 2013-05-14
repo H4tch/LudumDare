@@ -18,17 +18,23 @@ function FutureMap:load()
 	
 	map.rows = 0
 	map.columns = 0
-	-- Read the map file.
+	map.rowData = {}
+	
+	-- Get the number of rows
 	for line in lines(dir.."map.dat") do
 		map[map.rows] = {}
+		map.rowData[map.rows] = line
+		map.rows = map.rows + 1
+	end
 		
+	-- Now read in the rows, in reverse order.
+	for i=0, #map.rowData do
 		map.columns = 0
 		-- Read in each block number.
-		for num in line:gmatch("%d+") do
-			map[map.rows][map.columns] = tonumber(num)
+		for num in map.rowData[i]:gmatch("%d+") do
+			map[map.rows-i-1][map.columns] = tonumber(num)
 			map.columns = map.columns + 1
-		end		
-		map.rows = map.rows + 1
+		end	
 	end
 	
 	-- Set columns to the number on the top row.
@@ -37,15 +43,20 @@ function FutureMap:load()
 	-- Maps the block number to a texture.
 	map.images = {
 		[0]=Content.BlankTexture
-		,[1]=I("ground1.png")
-		,[2]=I("ground2.png")
+		,[1]=I("rock1.png")
+		,[2]=I("rock1.png")
 		,[3]=I("rock1.png")
+		,[4]=I("rock1.png")
 	}
-	map.tileSize = 32
+	map.tileSize = 48
 	map.tileRes = 8
+	-- tileScale
 	map.scale = 1
 	
-	local scale = 0
+	map.width = map.columns * map.tileSize
+	map.height = map.rows * map.tileSize
+	
+	local scale = 1
 	local newImage
 	
 	-- For each texture, resize it so it matches the tileSize and target resolution.
@@ -139,7 +150,8 @@ end
 
 function FutureMap:getBlockType(col, row)
 	if self[row] then
-		block = self[row][col]
+		block = self[self.rows-row-1][col]
+	else return 1
 	end
 	return (block or 1) -- Out of bounds counts as SOLID block.
 end
@@ -147,7 +159,7 @@ end
 
 function FutureMap:getTileFromPixel(x,y)
 	local col = math.floor(x / self.tileSize)
-	local row = math.floor(y / self.tileSize)
+	local row = math.floor((self.height - y) / self.tileSize)
 	--if col < 0 then col = 0 end
 	--if row < 0 then row = 0 end
 	return self:getBlockType(col,row)
@@ -198,7 +210,7 @@ end
 function FutureMap:getIntersection(rect)
 	-- Used to iterate over a slice of the map tiles.
 	local box = self:tilesCollidingWithRect( rect )
-	
+	box:print()
 	-- Holds the final result of the side collisions.
 	local hRect = Rect:create(0,0,0,0)
 	
@@ -312,15 +324,13 @@ function FutureMap:getIntersection(rect)
 end
 
 
-function FutureMap:draw(camera)
+function FutureMap:draw(camera, debug)
 	local box = self:tilesCollidingWithRect(camera)
 	local index
 	for c=box.x,box.w do
 		for r=box.y,box.h do
 			local b = self:getCellBox(c,r)
-			if self[r] then
-				index = self[r][c]
-			end
+			index = self:getCell(c,r)
 			tile = self.images[ index ]
 			if tile ~= nil then
 				love.graphics.setColor(255,255,255,255)
@@ -331,8 +341,8 @@ function FutureMap:draw(camera)
 				love.graphics.rectangle( "line", b.x-camera.x, b.y-camera.y, self.tileSize, self.tileSize, 0, 1, 1)
 				love.graphics.print( (index or ""), b.x-camera.x, b.y-camera.y, 0, 1)
 			end
-			if index ~= 0 then
-				love.graphics.print( c.."."..r, b.x-camera.x, b.y-camera.y, 0, .75, .75, 0, -self.tileSize/2)
+			if index ~= 0 and debug then
+				love.graphics.print( (c.."."..(self.rows-r-1)), b.x-camera.x, b.y-camera.y, 0, .75, .75, 0, -self.tileSize/2)
 			end
 		end
 	end
@@ -344,7 +354,7 @@ function FutureMap:drawGrid(camera)
 	-- Default line drawing is "smooth" which is too slow.
 	love.graphics.setLine(1, "rough")
 	local p
-	for r=1,self.rows do
+	for r=1,(self.rows-1) do
 		p = (r*self.tileSize)-camera.y
 		love.graphics.line( 0, p, window.w, p )
 		for c=1,self.columns do
@@ -357,6 +367,6 @@ end
 
 function FutureMap:getBounds()
 	-- The plus ones are for w/h are to account for the tile plus its w/h.
-	return Rect:create( 0, 0, (self.columns+1)*self.tileSize, (self.rows+1)*self.tileSize)
+	return Rect:create( 0, 0, (self.columns)*self.tileSize, (self.rows)*self.tileSize)
 end
 
