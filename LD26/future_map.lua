@@ -22,16 +22,18 @@ function FutureMap:load()
 	
 	-- Get the number of rows
 	for line in lines(dir.."map.dat") do
-		map[map.rows] = {}
-		map.rowData[map.rows] = line
-		map.rows = map.rows + 1
+		if line:find("%d+%s+") then
+'			map[map.rows] = {}
+			map.rowData[map.rows] = line
+			map.rows = map.rows + 1
+		end
 	end
 		
 	-- Now read in the rows, in reverse order.
 	for i=0, #map.rowData do
 		map.columns = 0
 		-- Read in each block number.
-		for num in map.rowData[i]:gmatch("%d+") do
+		for num in map.rowData[i]:gmatch("%d+%s+") do
 			map[map.rows-i-1][map.columns] = tonumber(num)
 			map.columns = map.columns + 1
 		end	
@@ -210,7 +212,7 @@ end
 function FutureMap:getIntersection(rect)
 	-- Used to iterate over a slice of the map tiles.
 	local box = self:tilesCollidingWithRect( rect )
-	box:print()
+	
 	-- Holds the final result of the side collisions.
 	local hRect = Rect:create(0,0,0,0)
 	
