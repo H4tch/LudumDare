@@ -112,6 +112,7 @@ end
 function Tiler:update(dt, player)
 	self.refTime = self.refTime + dt
 	if self.refTime >= self.interval then
+		print "Reloading.."
 		self.refTime = 0
 		self:setImage(self.filename)
 	end

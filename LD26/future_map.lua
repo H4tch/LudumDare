@@ -1,6 +1,9 @@
 
---todo add position for map
+-- Todo
+--add position for map
 --map size is limited since it is only positive cooridinates
+--add ability to save an image. ImageData:encode(filename)
+--have multiple maps on one image
 
 FutureMap = {}
 FutureMap_mt = { __index = FutureMap }
@@ -78,7 +81,7 @@ function FutureMap:load()
 		,[3]=I("rock1.png")
 		,[4]=I("rock1.png")
 	}
-	map.tileSize = 48
+	map.tileSize = 64
 	map.tileRes = 8
 	-- tileScale
 	map.scale = 1

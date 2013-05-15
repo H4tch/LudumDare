@@ -51,7 +51,7 @@ function Future:create()
 end
 
 function Future:createPlayer()
-	local x,y = self.map:getCellCoordinate(1,112)
+	local x,y = self.map:getCellCoordinate(1,116)
 	return Player:create("assets/future/player.png", x, y)
 end
 
