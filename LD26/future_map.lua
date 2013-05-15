@@ -12,6 +12,15 @@ function I(s)
 end
 
 
+function FutureMap.colorToId(r,g,b,a)
+	-- Black
+	if r == 0 and g == 0 and b == 0 and a == 255 then
+		return 1
+	end
+	return 0
+end
+
+
 function FutureMap:load()
 	local map = {}
 	setmetatable(map, FutureMap_mt)
@@ -20,10 +29,29 @@ function FutureMap:load()
 	map.columns = 0
 	map.rowData = {}
 	
+	map.mapData = love.image.newImageData("/assets/future/map.png")
+	local r,g,b,a
+	local id
+	
+	for x=0,(map.mapData:getWidth()-1) do
+		map[x] = {}
+		
+		map.rows = 0
+		for y=0,(map.mapData:getHeight()-1) do
+			r,g,b,a = map.mapData:getPixel(x,y)
+			id = FutureMap.colorToId( r,g,b,a )
+			map[x][map.mapData:getHeight()-1-y] = FutureMap.colorToId( r,g,b,a )
+			map.rows = map.rows + 1
+		end
+		
+		map.columns = map.columns + 1
+	end
+	
+	--[[
 	-- Get the number of rows
 	for line in lines(dir.."map.dat") do
 		if line:find("%d+%s+") then
-'			map[map.rows] = {}
+			map[map.rows] = {}
 			map.rowData[map.rows] = line
 			map.rows = map.rows + 1
 		end
@@ -33,14 +61,14 @@ function FutureMap:load()
 	for i=0, #map.rowData do
 		map.columns = 0
 		-- Read in each block number.
-		for num in map.rowData[i]:gmatch("%d+%s+") do
+		for num in map.rowData[i]:gmatch("%d+") do
 			map[map.rows-i-1][map.columns] = tonumber(num)
 			map.columns = map.columns + 1
 		end	
 	end
-	
-	-- Set columns to the number on the top row.
-	map.columns = #map[1]
+	--]]
+	--map.columns = #map[1]
+	--print("Col: "..map.columns)
 	
 	-- Maps the block number to a texture.
 	map.images = {
@@ -123,39 +151,13 @@ function FutureMap:tilesCollidingWithRect( rect )
 end
 
 
-function FutureMap:edgeCollidesWithTile(x1,y1,x2,y2)
-	local box = self:tilesCollidingWithRect(Rect:create(x1,y1,x2-x1,y2-y1))
-	for c=box.x,box.w do
-		for r=box.y,box.h do
-			if self:getBlockType(c, r) ~= 0 or self[r] == nil or self[r][c] == nil then
-				return true
-			end
-		end
-	end
-end
-
-
-function FutureMap:collidesWithTile(rect)
-	local box = self:tilesCollidingWithRect( rect )
-	
-	print("Player collides with these coordinates "..box.x..","..box.y.." "..box.w..","..box.h)
-	
-	for c=box.x,box.w do
-		for r=box.y,box.h do
-			if self:getBlockType(c, r) ~= 0 then
-				return true
-			end
-		end
-	end
-end
-
-
+-- Out of bounds counts as SOLID block, exept for the row.
 function FutureMap:getBlockType(col, row)
-	if self[row] then
-		block = self[self.rows-row-1][col]
+	if self[col] then
+		block = self[col][self.rows-row-1]
 	else return 1
 	end
-	return (block or 1) -- Out of bounds counts as SOLID block.
+	return (block or 0)
 end
 
 
@@ -349,6 +351,7 @@ function FutureMap:draw(camera, debug)
 		end
 	end
 	--self:drawGrid(camera)
+	--love.graphics.draw(self.mapData,0,0,0,1)
 end
 
 

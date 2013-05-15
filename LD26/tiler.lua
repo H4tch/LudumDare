@@ -9,23 +9,33 @@ Tiler_mt = { __index = Tiler }
 
 function Tiler:create( file )
 	local s = {}
+	s.filename = file
+	s.interval = 2
+	s.refTime = 0
 	setmetatable(s, Tiler_mt)
-	s.tileSize = 64
-	s.tileRes = 64
 	s.scale = 1
 	s.originalTile = Content:image(file)
+	s.tileSize = s.originalTile:getWidth()
+	s.tileRes = s.tileSize
 	s.tile = s:setImage(file)
 	s.cols = math.floor(window.w / s.tileSize)
 	s.rows = math.floor(window.h / s.tileSize)
 	return s
 end
 
+
 function Tiler:setImage( file )
-	self.tile = love.graphics.newImage( file )
+	local tempTile = love.graphics.newImage( file )
+	if not tempTile then
+		return self.tile
+	else self.tile = tempTile
+	end
 	-- Embrace pixelization!
 	self.tile:setFilter("nearest","nearest")
+	--[[
 	-- Magnify
 	if self.tile:getWidth() ~= self.tileSize then
+		print "MAGNIFYING"
 		local wScale = self.tileSize / self.tile:getWidth()
 		local hScale = self.tileSize / self.tile:getHeight()
 		local newImage = love.graphics.newCanvas(self.tileSize, self.tileSize)
@@ -34,6 +44,9 @@ function Tiler:setImage( file )
 		self.tile = love.graphics.newImage(newImage:getImageData())
 	end
 	self.tile:setFilter("nearest","nearest")
+	--]]
+	
+	self:setTileResolution(self.tileRes)
 	return self.tile
 end
 
@@ -73,6 +86,7 @@ function Tiler:setTileSize(size)
 	self.rows = math.ceil(window.h / self.tileSize)
 end
 
+
 function Tiler:draw(camera)
 	for x=0,self.cols do
 		for y=0,self.rows do
@@ -96,15 +110,21 @@ function Tiler:prevScene()
 end
 
 function Tiler:update(dt, player)
+	self.refTime = self.refTime + dt
+	if self.refTime >= self.interval then
+		self.refTime = 0
+		self:setImage(self.filename)
+	end
 end
 
 function Tiler:onKeyDown(key, isRepeat)
-	if key == "up" then
+	if key == "return" then
+		self:setImage(self.filename)
+	elseif key == "up" then
 		self:setTileSize(self.tileSize+16)
 	elseif key == "down" then
 		self:setTileSize(self.tileSize-16)
-	end
-	if key == "left" then
+	elseif key == "left" then
 		self:setTileResolution(self.tileRes-32)
 	elseif key == "right" then
 		self:setTileResolution(self.tileRes+32)
