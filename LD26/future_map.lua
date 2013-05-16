@@ -14,15 +14,38 @@ function I(s)
 	return Content:image(dir..s)
 end
 
-
-function FutureMap.colorToId(r,g,b,a)
-	-- Black
-	if r == 0 and g == 0 and b == 0 and a == 255 then
+-- Returns the color's unique id(0-16777216) and it's opacity (1-255)
+-- The opacity could be used for different collision properties.
+-- 0 => Invisible(0,0,0,0)
+-- 1 => Black(0,0,0,255)
+function FutureMap.colorToBlockId(r,g,b,a)
+	if r == 0 and g == 0 and b == 0 and a == 0 then				-- Invisible
+		return 0,0
+--[[
+	elseif r == 0 and g == 0 and b == 0 and a == 255 then		-- Black
 		return 1
+	elseif r == 255 and g == 255 and b == 255 and a == 255 then	-- White
+	elseif r == 255 and g == 0 and b == 0 and a == 255 then		-- Red
+	elseif r == 0 and g == 255 and b == 0 and a == 255 then		-- Green
+	elseif r == 0 and g == 0 and b == 255 and a == 255 then		-- Blue
+	elseif r == 0 and g == 255 and b == 255 and a == 255 then	-- Cyan
+	elseif r == 255  and g == 255 and b == 0 and a == 255 then	-- Yellow
+	elseif r == 255 and g == 0 and b == 255 and a == 255 then	-- Magenta
+--]]
+	else	-- Calc each color's own unique id.
+		return 1 + r + (g * (2^8)) + (b * (2^16)), a
 	end
-	return 0
+	return 0,0
 end
 
+function FutureMap.colorIdToColor(id)
+	id = id - 1
+	local b = math.floor(id / (2^16))
+	id = id - (b * (2^16))
+	local g = math.floor(id / (2^8))
+	id = id - (g * (2^8))
+	return id,g,b
+end
 
 function FutureMap:load()
 	local map = {}
@@ -41,9 +64,14 @@ function FutureMap:load()
 		
 		map.rows = 0
 		for y=0,(map.mapData:getHeight()-1) do
+			id = nil
+			r,g = nil,nil
+			b,a = nil,nil
+			
 			r,g,b,a = map.mapData:getPixel(x,y)
-			id = FutureMap.colorToId( r,g,b,a )
-			map[x][map.mapData:getHeight()-1-y] = FutureMap.colorToId( r,g,b,a )
+			id = FutureMap.colorToBlockId( r,g,b,a )
+			map[x][map.mapData:getHeight()-1-y] = id
+			
 			map.rows = map.rows + 1
 		end
 		

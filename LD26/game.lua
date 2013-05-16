@@ -17,9 +17,17 @@ function Game:init()
 	Game.currentScene = "future"
 	Game.player = Game.scene[Game.currentScene]:createPlayer()
 	Game.camera = Rect:create( 0, 0, window.w, window.h )
-	Rect.print(Game.player)
+	
+	--Rect.print(Game.player)
+	
 	--print("Map tileSize: "..Game.scene[Game.currentScene].map.tileSize)
 	--print(Game.scene[Game.currentScene].tileSize)
+	local white = Game.scene[Game.currentScene].map.colorToBlockId(255,255,255,255)
+	print("White:"..white)
+	print(Game.scene[Game.currentScene].map.colorIdToColor(white))
+	local black = Game.scene[Game.currentScene].map.colorToBlockId(127,40,213,255)
+	print("Black:"..black)
+	print(Game.scene[Game.currentScene].map.colorIdToColor(black))
 	--Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,0,0) ):print()
 	x,y = Game.scene[Game.currentScene].map:getAlignedPixel(500, 200)
 	c,r = Game.scene[Game.currentScene].map:getCellFromPixel(x, y)

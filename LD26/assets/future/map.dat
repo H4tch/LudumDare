@@ -1,12 +1,37 @@
-Todo:
-	Need to store map within an image.
-	Support multiple maps per image by using pink(255,0,255,255) pixels for the bounds. Each map can then be given an id in a separate file.
+Todo: Rename Map to Level, which has 
+
+** Map Content Structure
+assets/
+  mymap/ 		-- All Assets for the Scene/Level/Map
+    mymap.png	-- Image holding all the map tiles. Dimensions are a power of 2.
+    mymap.dat	-- Configuration of maps
+
+  
+** Multiple Maps
+	Use pink(255,0,255,255) pixels for a bounding box. Need 3-4 points.
+
+** Map locations
+	Locations are described in the config file. They don't use any pink
+	dots. They use a dot for teleporting to?
+
+** Player Spawning point
 	Use green pixels to determine where the player spawns in the map.
-	
+	There should be one for each top-level map.
+
+
 [maze]
-	id:1
-	
+  id:1
+  x:0			-- In-game X-coordinate
+  y:0			-- In-game Y-coordinate
+  tileSize:64	-- Desired size the tile should be rendered at.
+  location:player_house
+    x:224		-- Image X-coordinate relative to parent map.
+    y:64		-- Image Y-coordinate relative to parent map.
 	
 [dungeon]
 	id:2
 	inline:false
+	x:
+	y:
+
+

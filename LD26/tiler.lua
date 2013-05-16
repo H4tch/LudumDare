@@ -53,7 +53,7 @@ end
 
 --Todo, maybe use a Quad
 function Tiler:setTileResolution(res, filter)
-	print(res)
+	print("Resolution: "..res)
 	local scale = 0
 	local v = self.originalTile
 	local newImage
