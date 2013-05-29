@@ -1,8 +1,10 @@
 
 require "future_map"
 
+
 Future = inheritsFrom(Scene)
 Future_mt = { __index = Future }
+
 
 function Future:create()
 --	local future = Scene:create()
@@ -28,7 +30,7 @@ function Future:create()
 				0, 1,				-- Rotation, scale
 				0,					-- Velocity X
 				0					-- Velocity Y
-				)
+		)
 		cloud1.y = (cloud1.y / 5) * 3 - 100
 		
 		local fade = (cloud1.y+1)
@@ -50,14 +52,16 @@ function Future:create()
 	return future
 end
 
+
 function Future:createPlayer()
 --	local x,y = self.map:getCellCoordinate(105,100)
 	local x,y = self.map:getCellCoordinate(25,110)
 	return Player:create("assets/future/player.png", x, y)
 end
 
+
 function Future:nextScene()
-	return "midieval"
+	return "modern"
 end
 
 
@@ -67,127 +71,102 @@ end
 
 
 function Future:update(dt, player, debug)
+	-- Debug string.
 	local s = ""
-	self:updateClouds(dt)
 	
+	self:updateClouds(dt)
 	self.map:update(dt)
-
-	--local p = player
+	--self.map:updatePlayer(dt)
+	
 	local p = Rect:create(player.x, player.y, player.w, player.h)
 	local x = 0
 	local y = 0
 	
+	-- Stores player's (Left|Right) intersection with the map.
 	local hRect = Rect:create(0,0,0,0)
+	-- Stores player's (Top|Bottom) intersection with the map.
 	local vRect = Rect:create(0,0,0,0)
 	
 	-- Holds a string("left","right","up","down" to suggest a new placement
-	-- for if both sides collide, or top and bottom collide.)
+	-- of the player for if both sides collide on an axis collide with map.)
 	local hPlacement, vPlacement
 	
 	hRect,vRect,hPlacement,vPlacement = self.map:getIntersection( p )
 	
-	-- If a small portion of the bottom or top intersects
+	-- If a small portion of the bottom or top intersects, then don't
+	-- count it as a side collision. This is to avoid false positives.
 	if (hRect.h < 15 and p.h >= 15)
 	  and ( ((p.y < hRect.y) and (p.y + p.h == hRect.y + hRect.h)) --bottom
 	    or  ((p.y == hRect.y) and (p.y + p.h > hRect.y + hRect.h)) ) --top
 	then
-	--else
+		-- Do Nothing.
 	-- If Left edge.
 	elseif hRect.x == p.x then
-		-- and If Right edge.
 		if hRect.w == p.w then
-			-- Do nothing for now for left and right collision.
-			s = s.."LR|--------|".."\n"
-			if hPlacement then s = s.."need to move "..hPlacement.."\n" end
+			-- Do nothing if both sides collide.
+			if hPlacement then s = s.."Suggested to move "..hPlacement.."\n" end
 		else
-			player.state["collidesLeft"] = true
-			player.state["collidesRight"] = false
-			s = s.."L |----".."\n"
-			s = s..hRect:str()
 			x,_ = self.map:getAlignedPixel( p.x, p.y)
-			s = s.."before "..p.x
 			player.x = x + self.map.tileSize
-			s = s.."after "..player.x
-			--player.x = player.lastPos.x
-			
 			-- EXPERIMENTAL, should be safe.
 			if player.vel.x < 0 then
 				player.vel.x = 0
 			end
+			player.state["collidesLeft"] = true
+			player.state["collidesRight"] = false
 		end
-	--end
+	
 	-- If Right edge.
 	elseif hRect.x + hRect.w == p.x + p.w then
-		player.state["collidesRight"] = true
-		player.state["collidesLeft"] = false
-		s = s.."R      ----|"
 		x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
-		s = s.."before "..player.x.."\n"
 		player.x = x - p.w
-		s = s.."after "..player.x.."\n"
-		--player.x = player.lastPos.x
-
 		-- EXPERIMENTAL, should be safe.
 		if player.vel.x > 0 then
 			player.vel.x = 0
 		end
+		player.state["collidesRight"] = true
+		player.state["collidesLeft"] = false
 	end
 	
 	-- If Top edge.
 	if vRect.y == p.y then
-		-- And if bottom edge.
 		if vRect.h == p.h then
-			-- Do nothing for now.
-			s = s.."TB========".."\n"
-			s = s.."need to move "..vPlacement.."\n"
+			-- Do nothing if top+bottom sides collide.
+			if vPlacemnet then s = s.."Suggested to move "..vPlacement.."\n" end
 		else
-			player.state["collidesTop"] = true
-			player.state["collidesBottom"] = false
-			s = s.."T `````".."\n"
 			_,y = self.map:getAlignedPixel( p.x, p.y)
 			player.y = y + self.map.tileSize
-			--player.y = player.lastPos.y
-			-- If player is falling do not reset his Y velocity.
-			-- This is needed because when the tiles are 32px, e.g,
-			-- If the player's top collides with the bottom of the tile
-			-- It will appear he 'hooks' onto it. If his velocity wasa reset,
-			-- he would be able to 'hook' onto  another one that is 
-			-- one step over and one step down(stairstepped).
 			if player.vel.y < 0 then
 				player.vel.y = 0
 				player.jumpVel = 0
 			end
+			player.state["collidesTop"] = true
+			player.state["collidesBottom"] = false
 		end
 		
 	-- If Bottom edge.
 	elseif vRect.y + vRect.h == p.y + p.h then
-		player.state["collidesbottom"] = true
-		player.state["collidesTop"] = false
-		s = s.."B _____".."\n"
 		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
 		player.y = y - player.h
-		--player.y = player.lastPos.y
-		-- Don't reset player's velocity if moving Up.
 		if player.vel.y > 0 then
 			player.vel.y = 0
 			player.state.inAir = false
 			player.jumpVel = 0
 			player.state.isJumping = false
 		end
+		player.state["collidesbottom"] = true
+		player.state["collidesTop"] = false
 	end
-		-- In no blocks under player, make him fall.
+	
+	-- In no blocks under player, make him fall.
 	if (self.map:getBlockType(self.map:getCellFromPixel(p.x+.5, p.y+p.h+2)) == 0
 		  and self.map:getBlockType(self.map:getCellFromPixel(p.x+p.w-1, p.y+p.h+2)) == 0)
 	then
-		-- TODO? Check if corners collide with tile, if so, make him
-		-- fall ~3.5 pixels so there is no bottom collision.
 		player.state.inAir = true
-		-- Prevent double jumping.
 		player.state.isJumping = true
 	end
-	if debug then
-		print(s)
-	end
+	
+	if debug then print(s) end
 	s = ""
 end
 
@@ -197,13 +176,13 @@ function Future:updateClouds(dt, player)
 	love.graphics.setBlendMode("alpha")
 	for i=1,table.getn(self.clouds) do
 		-- If it passed the edge of the screen, wrap it to the other side.
-		if self.clouds[i].x < window.x - (self.clouds[i].w * self.clouds[i].scale) then
+		if self.clouds[i].x < window.x - (self.clouds[i].w * self.clouds[i].scale)
+		then
 			self.clouds[i].x = window.x + window.w + math.random(1,140)
 		end
 		self.clouds[i]:update(dt)
 	end
 end
-
 
 
 function Future:draw(camera, debug)
@@ -217,31 +196,31 @@ end
 
 function Future:drawClouds(camera)
 	for i=1,table.getn(self.clouds) do
-		-- If collides with camera
 		if window:collidesWith( self.clouds[i] ) then
 			self.clouds[i]:draw(Rect:create(0,camera.y/20,0,0))
 		end
 	end
 end
 
+
 function Future:getBounds()
 	return self.map:getBounds()
 end
 
-function Future:moveTo(x,y)
-end
 
 function Future:onKeyDown(key, isRepeat)
 end
 
+
 function Future:onKeyUp(key)
 end
+
 
 function Future:onMouseDown(x, y, button)
 end
 
+
 function Future:onMouseUp(x, y, button)
 end
-
 
 

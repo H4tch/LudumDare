@@ -84,7 +84,7 @@ function FutureMap:load()
 		,[3]=I("rock1.png")
 		,[4]=I("rock1.png")
 	}
-	map.tileSize = 64
+	map.tileSize = 32
 	map.tileRes = 16
 	-- tileScale
 	map.scale = 1
