@@ -233,13 +233,6 @@ function FutureMap:getIntersection(rect)
 	local minC
 	-- Holds the maximun cell in the row/column that is solid.
 	local maxC
-	-- Experimental value that holds which row/column was intersected with last.
-	local prevC
-	
-	-- Suggestions to handle a double collision (e.g. both sides collide)
-	-- Contains either "left", "right", "up", or "down.
-	local hPlacement
-	local vPlacement
 	
 	for c=box.x,box.w do
 		-- Reset bounds for each column.
@@ -261,25 +254,6 @@ function FutureMap:getIntersection(rect)
 			r1 = Rect.intersection(rect, self:getCellRangeBox(c,minC,c,maxC))
 			-- It's a side collision if it's taller than wide.
 			if r1.w < r1.h and (r1.w > 3 or r1.h > 3) then
-				-- Check collision with two columns.
---[[				if not prevC then prevC = c end
-				if prevC and (r1.x == rect.x and r1.x+r1.w == rect.x+rect.w)
-				then
-					-- Left and Right sides intersect!
-					-- Suggest moving to the smaller intersection result.
-					local a1, a2
-					a1 = (hRect.w + r1.w) * (hRect.h)
-					a2 = (r1.w + hRect.w) * (r1.h)
-					if a1 > a2 then
-						hPlacement = "right"
-					elseif a1 == a2 then
-					else hPlacement = "left"
-					end
-					print("double side collision "..prevC.." "..c)
-					print(hPlacement)
-					r1:print()
-				end
---]]
 				-- Combine/Create the vRect.
 				if (hRect.w == 0 and hRect.h == 0)
 				  or (hRect.y == r1.y or hRect.y + hRect.h == r1.y + r1.h)
@@ -310,22 +284,6 @@ function FutureMap:getIntersection(rect)
 			r1 = Rect.intersection(rect, self:getCellRangeBox(minC,r,maxC,r))
 			-- It's a top/bottom collision if it's wider than tall.
 			if r1.w > r1.h and (r1.w > 3 or r1.h > 3) then
-				-- Check collision with two rows.
---[[				if not prevC then prevC = c end
-				if prevC and (r1.y == rect.y and r1.y+r1.h == rect.y+rect.h)
-				then
-					-- Top and Bottom sides intersect!
-					-- Suggest moving to the smaller intersection result.
-					local a1, a2
-					a1 = (vRect.h + r1.h) * (vRect.w)
-					a2 = (r1.h + vRect.h) * (r1.w)
-					if a1 > a2 then
-						vPlacement = "down"
-					elseif a1 == a2 then
-					else vPlacement = "up"
-					end
-				end
---]]
 				-- Combine/Create the vRect.
 				if (vRect.w == 0 and vRect.h == 0)
 				  or (vRect.x == r1.x or vRect.x + vRect.w == r1.x + r1.w)
@@ -335,7 +293,7 @@ function FutureMap:getIntersection(rect)
 			end
 		end
 	end
-	return hRect,vRect,hPlacement,vPlacement
+	return hRect,vRect
 end
 
 

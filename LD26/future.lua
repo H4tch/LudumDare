@@ -87,11 +87,7 @@ function Future:update(dt, player, debug)
 	-- Stores player's (Top|Bottom) intersection with the map.
 	local vRect = Rect:create(0,0,0,0)
 	
-	-- Holds a string("left","right","up","down" to suggest a new placement
-	-- of the player for if both sides collide on an axis collide with map.)
-	local hPlacement, vPlacement
-	
-	hRect,vRect,hPlacement,vPlacement = self.map:getIntersection( p )
+	hRect,vRect = self.map:getIntersection( p )
 	
 	-- If a small portion of the bottom or top intersects, then don't
 	-- count it as a side collision. This is to avoid false positives.
@@ -104,7 +100,6 @@ function Future:update(dt, player, debug)
 	elseif hRect.x == p.x then
 		if hRect.w == p.w then
 			-- Do nothing if both sides collide.
-			if hPlacement then s = s.."Suggested to move "..hPlacement.."\n" end
 		else
 			x,_ = self.map:getAlignedPixel( p.x, p.y)
 			player.x = x + self.map.tileSize
@@ -132,7 +127,6 @@ function Future:update(dt, player, debug)
 	if vRect.y == p.y then
 		if vRect.h == p.h then
 			-- Do nothing if top+bottom sides collide.
-			if vPlacemnet then s = s.."Suggested to move "..vPlacement.."\n" end
 		else
 			_,y = self.map:getAlignedPixel( p.x, p.y)
 			player.y = y + self.map.tileSize
