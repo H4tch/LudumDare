@@ -142,30 +142,19 @@ function FutureMap:tilesCollidingWithRect( rect )
 		,math.floor((rect.y) / self.tileSize)
 		,math.floor((rect.x + rect.w-1) / self.tileSize)
 		,math.floor((rect.y + rect.h-1) / self.tileSize)
-		)
-	--if box.x < 1 then box.x = 1 end
-	--if box.y < 1 then box.y = 1 end
-	--if box.w > self.columns then box.w = self.columns end
-	--if box.h > self.rows then box.h = self.rows end
-	
-	--if box.w < box.x then box.w = box.x end
-	--if box.h < box.y then box.h = box.y end
-	
-	--if box.w < 1 then box.w = 1 end
-	--if box.h < 1 then box.h = 1 end
-	--if box.x > self.columns then box.x = self.columns end
-	--if box.y > self.rows then box.y = self.rows end
+	)
+
 	return box
 end
 
 
--- Out of bounds counts as SOLID block, exept for the row.
+-- Out of bounds counts as SOLID block.
 function FutureMap:getBlockType(col, row)
 	if self[col] then
 		block = self[col][self.rows-row-1]
 	else return 1
 	end
-	return (block or 0)
+	return (block or 1)
 end
 
 
@@ -177,25 +166,25 @@ function FutureMap:getTileFromPixel(x,y)
 	return self:getBlockType(col,row)
 end
 
+
 function FutureMap:getCell(col,row)
 	return self:getBlockType(col,row)
 end
 
--- Get X,Y of a cell(C,R).
-function FutureMap:getCellCoordinate(col,row)
-	return (col * self.tileSize),(row * self.tileSize)
-end
+
 -- Get X,Y of a cell(C,R).
 function FutureMap:getCellCoordinates(col,row)
 	return (col * self.tileSize),(row * self.tileSize)
 end
 
--- Get a rect of a cell(C,R)
+
+-- Get a rect of a cell(C,R).
 function FutureMap:getCellBox(col,row)
 	return Rect:create((col * self.tileSize), (row * self.tileSize), self.tileSize)
 end
 
--- Get a rect of a range of cells(C1,R1,C2,R2), inclusive
+
+-- Get a rect of a range of cells(C1,R1,C2,R2), inclusive.
 function FutureMap:getCellRangeBox( c1, r1, c2, r2 )
 	local x,y
 	local r = Rect:create(0,0,0,0)
@@ -207,18 +196,22 @@ function FutureMap:getCellRangeBox( c1, r1, c2, r2 )
 	return r
 end
 
+
 -- Get the cell(C,R) of an X,Y pixel.
 function FutureMap:getCellFromPixel(x,y)
 	-- Changed to ceil() - 1 instead of floor() so
 	return math.ceil(x / self.tileSize)-1, math.ceil(y / self.tileSize)-1
 end
 
+
+-- Get the upper-left pixel coordinate of the cell that X,Y is within.
 function FutureMap:getAlignedPixel(x,y)
 	return self:getCellCoordinates( FutureMap.getCellFromPixel(self,x,y) )
 end
 
 
--- Get the intersection of a rect with the collidible tiles in the map.
+-- Get the intersection of a rect with the collidable tiles in the map.
+-- Note: This is a very long function.
 function FutureMap:getIntersection(rect)
 	-- Used to iterate over a slice of the map tiles.
 	local box = self:tilesCollidingWithRect( rect )
@@ -264,12 +257,15 @@ function FutureMap:getIntersection(rect)
 			end
 		end
 		if minC then
-			-- Now get the intersection the rect has to the column.
+			-- Now get the intersection the rect has with the column.
 			r1 = Rect.intersection(rect, self:getCellRangeBox(c,minC,c,maxC))
-			-- It's a side collision of the intersection is taller than wide.
+			-- It's a side collision if it's taller than wide.
 			if r1.w < r1.h and (r1.w > 3 or r1.h > 3) then
 				-- Check collision with two columns.
-				if not prevC then prevC = c else 
+--[[				if not prevC then prevC = c end
+				if prevC and (r1.x == rect.x and r1.x+r1.w == rect.x+rect.w)
+				then
+					-- Left and Right sides intersect!
 					-- Suggest moving to the smaller intersection result.
 					local a1, a2
 					a1 = (hRect.w + r1.w) * (hRect.h)
@@ -283,6 +279,8 @@ function FutureMap:getIntersection(rect)
 					print(hPlacement)
 					r1:print()
 				end
+--]]
+				-- Combine/Create the vRect.
 				if (hRect.w == 0 and hRect.h == 0)
 				  or (hRect.y == r1.y or hRect.y + hRect.h == r1.y + r1.h)
 				then
@@ -308,12 +306,15 @@ function FutureMap:getIntersection(rect)
 			end
 		end
 		if minC then
-			-- Now get the intersection the rect has to the row.
+			-- Now get the intersection the rect has with the row.
 			r1 = Rect.intersection(rect, self:getCellRangeBox(minC,r,maxC,r))
-			-- It's a top/bottom collision of the intersection is wider than tall
+			-- It's a top/bottom collision if it's wider than tall.
 			if r1.w > r1.h and (r1.w > 3 or r1.h > 3) then
 				-- Check collision with two rows.
-				if not prevC then prevC = c else
+--[[				if not prevC then prevC = c end
+				if prevC and (r1.y == rect.y and r1.y+r1.h == rect.y+rect.h)
+				then
+					-- Top and Bottom sides intersect!
 					-- Suggest moving to the smaller intersection result.
 					local a1, a2
 					a1 = (vRect.h + r1.h) * (vRect.w)
@@ -324,6 +325,8 @@ function FutureMap:getIntersection(rect)
 					else vPlacement = "up"
 					end
 				end
+--]]
+				-- Combine/Create the vRect.
 				if (vRect.w == 0 and vRect.h == 0)
 				  or (vRect.x == r1.x or vRect.x + vRect.w == r1.x + r1.w)
 				then
