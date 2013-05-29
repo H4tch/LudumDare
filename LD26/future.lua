@@ -70,22 +70,16 @@ function Future:prevScene()
 end
 
 
-function Future:update(dt, player, debug)
-	-- Debug string.
-	local s = ""
-	
+function Future:update(dt, player)
 	self:updateClouds(dt)
 	self.map:update(dt)
 	--self.map:updatePlayer(dt)
 	
 	local p = Rect:create(player.x, player.y, player.w, player.h)
-	local x = 0
-	local y = 0
+	local x,y = 0,0
 	
-	-- Stores player's (Left|Right) intersection with the map.
-	local hRect = Rect:create(0,0,0,0)
-	-- Stores player's (Top|Bottom) intersection with the map.
-	local vRect = Rect:create(0,0,0,0)
+	-- Stores player's (Left|Right) and (Top|Bottom) intersection with the map.
+	local hRect,vRect = Rect:create(0,0,0,0), Rect:create(0,0,0,0)
 	
 	hRect,vRect = self.map:getIntersection( p )
 	
@@ -94,19 +88,15 @@ function Future:update(dt, player, debug)
 	if (hRect.h < 15 and p.h >= 15)
 	  and ( ((p.y < hRect.y) and (p.y + p.h == hRect.y + hRect.h)) --bottom
 	    or  ((p.y == hRect.y) and (p.y + p.h > hRect.y + hRect.h)) ) --top
-	then
-		-- Do Nothing.
+	then 	-- Do Nothing.
+	
 	-- If Left edge.
 	elseif hRect.x == p.x then
-		if hRect.w == p.w then
-			-- Do nothing if both sides collide.
+		if hRect.w == p.w then	-- Do nothing if both sides collide.
 		else
 			x,_ = self.map:getAlignedPixel( p.x, p.y)
 			player.x = x + self.map.tileSize
-			-- EXPERIMENTAL, should be safe.
-			if player.vel.x < 0 then
-				player.vel.x = 0
-			end
+			if player.vel.x < 0 then player.vel.x = 0 end
 			player.state["collidesLeft"] = true
 			player.state["collidesRight"] = false
 		end
@@ -115,20 +105,16 @@ function Future:update(dt, player, debug)
 	elseif hRect.x + hRect.w == p.x + p.w then
 		x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
 		player.x = x - p.w
-		-- EXPERIMENTAL, should be safe.
-		if player.vel.x > 0 then
-			player.vel.x = 0
-		end
+		if player.vel.x > 0 then player.vel.x = 0 end
 		player.state["collidesRight"] = true
 		player.state["collidesLeft"] = false
 	end
 	
 	-- If Top edge.
 	if vRect.y == p.y then
-		if vRect.h == p.h then
-			-- Do nothing if top+bottom sides collide.
+		if vRect.h == p.h then	-- Do nothing if top+bottom sides collide.
 		else
-			_,y = self.map:getAlignedPixel( p.x, p.y)
+			_,y = self.map:getAlignedPixel( p.x, p.y )
 			player.y = y + self.map.tileSize
 			if player.vel.y < 0 then
 				player.vel.y = 0
@@ -140,13 +126,13 @@ function Future:update(dt, player, debug)
 		
 	-- If Bottom edge.
 	elseif vRect.y + vRect.h == p.y + p.h then
-		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
+		_,y = self.map:getAlignedPixel( player.x, player.y + player.h )
 		player.y = y - player.h
 		if player.vel.y > 0 then
 			player.vel.y = 0
-			player.state.inAir = false
 			player.jumpVel = 0
-			player.state.isJumping = false
+			player.state["inAir"] = false
+			player.state["isJumping"] = false
 		end
 		player.state["collidesbottom"] = true
 		player.state["collidesTop"] = false
@@ -156,12 +142,9 @@ function Future:update(dt, player, debug)
 	if (self.map:getBlockType(self.map:getCellFromPixel(p.x+.5, p.y+p.h+2)) == 0
 		  and self.map:getBlockType(self.map:getCellFromPixel(p.x+p.w-1, p.y+p.h+2)) == 0)
 	then
-		player.state.inAir = true
-		player.state.isJumping = true
+		player.state["inAir"] = true
+		player.state["isJumping"] = true
 	end
-	
-	if debug then print(s) end
-	s = ""
 end
 
 
