@@ -71,7 +71,7 @@ function Player:onKeyDown(key, isRepeat)
 	elseif key == "right" or key == "d" then
 		self.state.right = true
 		--self.x = self.x + 4
-	elseif key == " " then
+	elseif key == " " or key == "up" or key == "w" then
 		--if self.state.inAir == false then
 			-- Make player jump
 			self.state.isJumping = true
@@ -90,7 +90,7 @@ function Player:onKeyUp(key, isRepeat)
 		self.state.left = false
 	elseif key == "right" or key == "d" then
 		self.state.right = false
-	elseif key == " " then
+	elseif key == " " or key == "up" or key == "w" then
 		if self.state.inAir == true then
 			self.state.isJumping = false
 			self.jumpVel = 0

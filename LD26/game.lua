@@ -1,3 +1,4 @@
+-- TODO Player needs to be within the scene/map, not Game.
 
 require "util"
 require "player"
@@ -13,7 +14,7 @@ function Game:init()
 	Game.debug = false
 	Game.scene = {}
 	Game.scene["future"] = Future:create()
-	Game.scene["tiler"] = Tiler:create("assets/future/rock1.png")
+	Game.scene["tiler"] = Tiler:create("assets/future/rock2.png")
 	Game.currentScene = "future"
 	Game.player = Game.scene[Game.currentScene]:createPlayer()
 	Game.camera = Rect:create( 0, 0, window.w, window.h )
@@ -22,12 +23,7 @@ function Game:init()
 	
 	--print("Map tileSize: "..Game.scene[Game.currentScene].map.tileSize)
 	--print(Game.scene[Game.currentScene].tileSize)
-	local white = Game.scene[Game.currentScene].map.colorToBlockId(255,255,255,255)
-	print("White:"..white)
-	print(Game.scene[Game.currentScene].map.colorIdToColor(white))
-	local black = Game.scene[Game.currentScene].map.colorToBlockId(127,40,213,255)
-	print("Black:"..black)
-	print(Game.scene[Game.currentScene].map.colorIdToColor(black))
+
 	--Game.scene[Game.currentScene].map:tilesCollidingWithRect( Rect:create(32,32,0,0) ):print()
 	x,y = Game.scene[Game.currentScene].map:getAlignedPixel(500, 200)
 	c,r = Game.scene[Game.currentScene].map:getCellFromPixel(x, y)
@@ -37,14 +33,15 @@ end
 function Game.update(dt)
 	if Game.currentScene ~= "tiler" then
 		Game.player:update(dt, Game.debug)
-		Game.camera:centerOver(Game.player)
-		Game.camera.x = Game.camera.x + (Game.camera.w / 5)
-		Game.camera.y = Game.camera.y - (Game.camera.h / 5)
-		Game.camera:keepWithin(Game.scene[Game.currentScene]:getBounds())
 	end
 	--Game.camera:centerOver(Game.scene[Game.currentScene]:getPlayer())
 	
 	Game.scene[Game.currentScene]:update(dt, Game.player, Game.debug)
+	
+	Game.camera:centerOver(Game.player)
+	Game.camera.x = Game.camera.x + (Game.camera.w / 5)
+	Game.camera.y = Game.camera.y - (Game.camera.h / 5)
+	Game.camera:keepWithin(Game.scene[Game.currentScene]:getBounds())
 	
 	--Game.camera:print()
 	--Rect.print(Game.player)

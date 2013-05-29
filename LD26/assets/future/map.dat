@@ -24,6 +24,7 @@ assets/
   x:0			-- In-game X-coordinate
   y:0			-- In-game Y-coordinate
   tileSize:64	-- Desired size the tile should be rendered at.
+  background:""	-- Do not draw a texture for the invisible pictures.
   location:player_house
     x:224		-- Image X-coordinate relative to parent map.
     y:64		-- Image Y-coordinate relative to parent map.

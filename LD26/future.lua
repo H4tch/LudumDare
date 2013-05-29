@@ -51,7 +51,8 @@ function Future:create()
 end
 
 function Future:createPlayer()
-	local x,y = self.map:getCellCoordinate(1,116)
+--	local x,y = self.map:getCellCoordinate(105,100)
+	local x,y = self.map:getCellCoordinate(25,110)
 	return Player:create("assets/future/player.png", x, y)
 end
 
@@ -103,12 +104,16 @@ function Future:update(dt, player, debug)
 			player.state["collidesRight"] = false
 			s = s.."L |----".."\n"
 			s = s..hRect:str()
-			player.vel.x = 0
 			x,_ = self.map:getAlignedPixel( p.x, p.y)
 			s = s.."before "..p.x
 			player.x = x + self.map.tileSize
 			s = s.."after "..player.x
 			--player.x = player.lastPos.x
+			
+			-- EXPERIMENTAL, should be safe.
+			if player.vel.x < 0 then
+				player.vel.x = 0
+			end
 		end
 	--end
 	-- If Right edge.
@@ -116,12 +121,16 @@ function Future:update(dt, player, debug)
 		player.state["collidesRight"] = true
 		player.state["collidesLeft"] = false
 		s = s.."R      ----|"
-		player.vel.x = 0
 		x,_ = self.map:getAlignedPixel( p.x + p.w, p.y)
 		s = s.."before "..player.x.."\n"
 		player.x = x - p.w
 		s = s.."after "..player.x.."\n"
 		--player.x = player.lastPos.x
+
+		-- EXPERIMENTAL, should be safe.
+		if player.vel.x > 0 then
+			player.vel.x = 0
+		end
 	end
 	
 	-- If Top edge.
@@ -135,12 +144,19 @@ function Future:update(dt, player, debug)
 			player.state["collidesTop"] = true
 			player.state["collidesBottom"] = false
 			s = s.."T `````".."\n"
-			player.vel.y = 0
-			player.jumpVel = 0
-			player.state.isJumping = false
 			_,y = self.map:getAlignedPixel( p.x, p.y)
 			player.y = y + self.map.tileSize
 			--player.y = player.lastPos.y
+			-- If player is falling do not reset his Y velocity.
+			-- This is needed because when the tiles are 32px, e.g,
+			-- If the player's top collides with the bottom of the tile
+			-- It will appear he 'hooks' onto it. If his velocity wasa reset,
+			-- he would be able to 'hook' onto  another one that is 
+			-- one step over and one step down(stairstepped).
+			if player.vel.y < 0 then
+				player.vel.y = 0
+				player.jumpVel = 0
+			end
 		end
 		
 	-- If Bottom edge.
@@ -148,13 +164,16 @@ function Future:update(dt, player, debug)
 		player.state["collidesbottom"] = true
 		player.state["collidesTop"] = false
 		s = s.."B _____".."\n"
-		player.vel.y = 0
 		_,y = self.map:getAlignedPixel( player.x, player.y + player.h)
 		player.y = y - player.h
 		--player.y = player.lastPos.y
-		player.state.inAir = false
-		player.jumpVel = 0
-		player.state.isJumping = false
+		-- Don't reset player's velocity if moving Up.
+		if player.vel.y > 0 then
+			player.vel.y = 0
+			player.state.inAir = false
+			player.jumpVel = 0
+			player.state.isJumping = false
+		end
 	end
 		-- In no blocks under player, make him fall.
 	if (self.map:getBlockType(self.map:getCellFromPixel(p.x+.5, p.y+p.h+2)) == 0

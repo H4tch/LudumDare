@@ -1,10 +1,4 @@
 
--- Todo
---add position for map
---map size is limited since it is only positive cooridinates
---add ability to save an image. ImageData:encode(filename)
---have multiple maps on one image
-
 FutureMap = {}
 FutureMap_mt = { __index = FutureMap }
 
@@ -19,7 +13,7 @@ end
 -- 0 => Invisible(0,0,0,0)
 -- 1 => Black(0,0,0,255)
 function FutureMap.colorToBlockId(r,g,b,a)
-	if r == 0 and g == 0 and b == 0 and a == 0 then				-- Invisible
+	if a == 0 then		-- Invisible
 		return 0,0
 --[[
 	elseif r == 0 and g == 0 and b == 0 and a == 255 then		-- Black
@@ -78,39 +72,20 @@ function FutureMap:load()
 		map.columns = map.columns + 1
 	end
 	
-	--[[
-	-- Get the number of rows
-	for line in lines(dir.."map.dat") do
-		if line:find("%d+%s+") then
-			map[map.rows] = {}
-			map.rowData[map.rows] = line
-			map.rows = map.rows + 1
-		end
-	end
-		
-	-- Now read in the rows, in reverse order.
-	for i=0, #map.rowData do
-		map.columns = 0
-		-- Read in each block number.
-		for num in map.rowData[i]:gmatch("%d+") do
-			map[map.rows-i-1][map.columns] = tonumber(num)
-			map.columns = map.columns + 1
-		end	
-	end
-	--]]
 	--map.columns = #map[1]
 	--print("Col: "..map.columns)
 	
 	-- Maps the block number to a texture.
 	map.images = {
-		[0]=Content.BlankTexture
+		--[0]=Content.BlankTexture
+		[0]=I("rock2.png")
 		,[1]=I("rock1.png")
 		,[2]=I("rock1.png")
 		,[3]=I("rock1.png")
 		,[4]=I("rock1.png")
 	}
 	map.tileSize = 64
-	map.tileRes = 8
+	map.tileRes = 16
 	-- tileScale
 	map.scale = 1
 	
@@ -121,7 +96,9 @@ function FutureMap:load()
 	local newImage
 	
 	-- For each texture, resize it so it matches the tileSize and target resolution.
-	for i,v in ipairs(map.images) do
+	for i=0,#map.images do
+		v = map.images[i]
+		v:setFilter("nearest","nearest")
 		-- Minify
 		if v:getWidth() ~= map.tileRes then
 			scale = map.tileRes / v:getWidth()

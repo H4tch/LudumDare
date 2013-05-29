@@ -126,9 +126,9 @@ function Tiler:onKeyDown(key, isRepeat)
 	elseif key == "down" then
 		self:setTileSize(self.tileSize-16)
 	elseif key == "left" then
-		self:setTileResolution(self.tileRes-32)
+		self:setTileResolution(self.tileRes/2)
 	elseif key == "right" then
-		self:setTileResolution(self.tileRes+32)
+		self:setTileResolution(self.tileRes*2)
 	end
 end
 
